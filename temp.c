@@ -1,5 +1,9 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 char *str_replace(char *orig, char *rep, char *with) 
-    {
+{
     char *result; // the return string
     char *ins;    // the next insert point
     char *tmp;    // varies
@@ -28,5 +32,20 @@ char *str_replace(char *orig, char *rep, char *with)
 
     if (!result)
         return NULL;
+
+    // first time through the loop, all the variable are set correctly
+    // from here on,
+    //    tmp points to the end of the result string
+    //    ins points to the next occurrence of rep in orig
+    //    orig points to the remainder of orig after "end of rep"
+    while (count--) {
+        ins = strstr(orig, rep);
+        len_front = ins - orig;
+        tmp = strncpy(tmp, orig, len_front) + len_front;
+        tmp = strcpy(tmp, with) + len_with;
+        orig += len_front + len_rep; // move to next "end of rep"
     }
-  
+    strcpy(tmp, orig);
+    return result;
+}
+
