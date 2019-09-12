@@ -23,16 +23,25 @@ int shoot=0;
 
 int copy_cut(int argc, char *argv[],int n)
 {
+	int k=0;
     FILE *fptr;
-    char dir_path[PATH_MAX+4];
+    char sour_path[PATH_MAX+4];
     fptr=fopen(str,"a+");
     if(fptr == NULL)
     {
       perror("Error!");
       exit(1); 
     }
-    path(dir_path);
-    fprintf(fptr," cd %s && ",dir_path);
+    
+	for(int i=n;i>argc;i++)
+	{
+		if(argv[i][0]!='\') k=1;
+		   }
+	if(k==1)
+		   {
+    path(sour_path);
+    fprintf(fptr," cd %s && ",sour_path);
+		   }
     for(;n<argc;n++)
         fprintf(fptr,"%s ",argv[n]);
     fprintf(fptr,"%s","\n");
@@ -44,7 +53,7 @@ int copy_cut(int argc, char *argv[],int n)
 int paste(int argc, char *argv[],int n)
 {
     FILE *fptr;
-    char dir_path[PATH_MAX]="cd ";
+    char dest_path[PATH_MAX]="cd ";
     char arr[5000]={'\0'};
     fptr=fopen(str,"r+");
     if(fptr == NULL)
@@ -52,15 +61,15 @@ int paste(int argc, char *argv[],int n)
       printf("Error!");
       exit(1);
     }
-    path(dir_path+3);
+    path(dest_path+3);
     while(getc(fptr)!=EOF)
     {
         fscanf(fptr,"%[^\n]s",arr);
-        strcat(arr,dir_path+2);
+        strcat(arr,dest_path+2);
 	system(arr);
 	printf("%s\n",arr);
     }
-    system(dir_path);
+    system(dest_path);
     return 2;
 }
 
@@ -76,22 +85,22 @@ int clear()
 
 }
 
-int main(int argc,char *argv[])
+int main(int argc,char *argv[]) 
 {
-    int ReturnVal=-1,cn=1;
+    int ReturnVal=-1,n=1;
     if(argc>1)
     {
         char choice[10];
         if(strcmp(argv[1],"-shoot")==0)
         {
             shoot=1;
-            cn=2;
+            n=2;
         }
-        strcpy(choice,argv[cn]);
+        strcpy(choice,argv[n]);
         if(strcmp(choice,"cp")==0||strcmp(choice,"mv")==0)
-            ReturnVal=copy_cut(argc,argv,cn);
+            ReturnVal=copy_cut(argc,argv,n);
         else if(strcmp(choice,"pas")==0)
-            ReturnVal=paste(argc,argv,cn);
+            ReturnVal=paste(argc,argv,n);
 	else if(strcmp(choice,"clr")==0)
 	    ReturnVal=clear();
         printf("Return Value = %d",ReturnVal);
