@@ -35,8 +35,9 @@ int copy_cut(int argc, char *argv[],int n)
     
 	for(int i=n;i>argc;i++)
 	{
-		if(argv[i][0]!='\') k=1;
-		   }
+		if(argv[i][0]!='\\')
+            k=1;
+	}
 	if(k==1)
 		   {
     path(sour_path);
