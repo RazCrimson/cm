@@ -8,9 +8,9 @@
 
 const char str[]="./myfile.txt"
 
-static bool paste_mode = false;
-
-
+static bool paste_mode=false;
+static bool absolute_path=true;
+static bool copy_move=false;
 
 int path(char *cwd) {
     if (getcwd(cwd, PATH_MAX) != NULL)
@@ -24,6 +24,10 @@ int path(char *cwd) {
 
 int shoot=0;
 
+int arg1(char ch)
+{
+	if(ch=='a')
+		
 int add(int argc, char *argv[],int n)
 {
 	int k=0;
@@ -40,15 +44,19 @@ int add(int argc, char *argv[],int n)
     for(int i=n;i<argc;i++)
 	{    if(argv[i][0]!='\\')
         {
-            absolute_path=true;
+            absolute_path=false;
             break;
         }
     }
-	if(absolute_path==true)
+	if(absolute_path==false)
 	{
         path(source_path);
-        fprintf(fptr," cd %s &&cp ",source_path);
+        fprintf(fptr," cd %s &&",source_path);
 	}
+	if(paste_mode==true)
+		fprintf(fptr,"mv ");
+	else
+		fprintf(fptr,"cp ");
     for(int i=n;i<argc;i++)
         fprintf(fptr,"%s ",argv[i]);
     fprintf(fptr,"%c",'\n');
@@ -105,13 +113,29 @@ void help()
 }
 int main(int argc,char *argv[])
 {
-    int ReturnVal=-1,n=1;
+    int ReturnVal=-1,n=1,j;
     if(argc<=1)
     {
         printf("\n%s requires at least one argument.\nPlease try %1$s ++help for more information.\n",argv[0]);
         return 0;
     }
-    char choice[10];
+    char choice[20];
+    for(int i= 1;i<argc;i++)
+    {
+	strcpy(choice,argv[i]);
+	if(choice[0]!='+')
+		break;
+	else if(choice[1]=='+')
+	{
+		arg2(choice);
+	}
+	else
+	{
+		for(j=1;choice[j]!='\0';j++)
+			arg1(choice[j]);
+	}
+    }
+    printf("Return Value = %d",ReturnVal);
     return 0;
 }
 
