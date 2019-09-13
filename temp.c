@@ -49,3 +49,45 @@ char *str_replace(char *orig, char *rep, char *with)
     return result;
 }
 
+int cwd_path(char *cwd)
+{
+    if (getcwd(cwd, PATH_MAX) != NULL)
+        return 0;
+    else
+    {
+        perror("getcwd() error");
+        return -1;
+    }
+}
+
+int exists(const char *file)
+{
+    FILE *fptr;
+    if ((fptr = fopen(file, "r")))
+    {
+        fclose(fptr);
+        return 1;
+    }
+    return 0;
+}
+
+char * absolute_path(char * file_path)
+{
+    char *path=malloc(sizeof(char)*PATH_MAX)
+    if(file_path[0]=='\\')
+        return file_path;
+
+    else if(file_path[0]=='.')
+    {
+        if(file_path[1]=='.'&&file_path[2]=='/')
+        {
+            path()
+        }
+        else if(file_path[1]=='/')
+        {
+            /* code */
+        }
+        
+    }
+
+}
