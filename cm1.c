@@ -31,11 +31,11 @@ int add(int argc, char *argv[],int n)
     FILE *fptr;
     char source_path[PATH_MAX+4];
     fptr=fopen(str,"w+");
-    fseek(fptr, 0, SEEK_END); 
+    fseek(fptr, 0, SEEK_END);
     if(fptr == NULL)
     {
       perror("Error!");
-      exit(1); 
+      exit(1);
     }
     for(int i=n;i<argc;i++)
 	{    if(argv[i][0]!='\\')
@@ -74,7 +74,7 @@ int paste(int argc, char *argv[],int n)
         fscanf(fptr,"%[^\n]s",arr);
         strcat(arr,dest_path+2);
         if(paste_mode==true)
-            *arr=str_replace(arr, "&&cp", "&&mv") 
+            *arr=str_replace(arr, "&&cp", "&&mv")
 	    system(arr);
 	    printf("%s\n",arr);
     }
@@ -83,7 +83,7 @@ int paste(int argc, char *argv[],int n)
 }
 
 int clear()
-{	
+{
     char cmd[50]="rm ";
     strcat(cmd,str);
     strcat(cmd,"; touch ");
@@ -94,7 +94,7 @@ int clear()
 
 }
 
-int main(int argc,char *argv[]) 
+int main(int argc,char *argv[])
 {
     int ReturnVal=-1,n=1;
     if(argc<=1)
@@ -106,10 +106,9 @@ int main(int argc,char *argv[])
     for(int i= 1;i<argc;i++)
     {
         if(strcmp(argv[n],"--shoot")==0)
-        
         strcpy(choice,argv[n]);
         if((!strcmp(choice,"--cp"))||(!strcmp(choice,"--mv"))||(!strcmp(choice,"--paste")))
-        {    
+        {
             if(!strcmp(choice,"--mv"))
                 paste_mode=true;
             ReturnVal=paste(argc,argv,n);
@@ -121,11 +120,9 @@ int main(int argc,char *argv[])
         else
         {
             /* code */
-        }
-            
+        } 
     }
     printf("Return Value = %d",ReturnVal);
     return 0;
-    
 }
 
