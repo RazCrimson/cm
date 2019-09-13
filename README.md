@@ -1,9 +1,9 @@
-TO DO\n
-1.convert all directories to absolute directories\n
-2.add and modify should'nt come together\n
-3.add and remove should'nt come together\n
-4.sub options of paste\n
-  1.adding destination\n
+TO DO
+1.convert all directories to absolute directories
+2.add and modify should'nt come together
+3.add and remove should'nt come together
+4.sub options of paste
+  1.adding destination
   2.options
     1.paste all of em
     2.paste the last one
