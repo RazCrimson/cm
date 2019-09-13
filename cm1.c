@@ -31,7 +31,7 @@ int add(int argc, char *argv[],int n)
     FILE *fptr;
     char source_path[PATH_MAX+4];
     fptr=fopen(str,"w+");
-    fseek(fp, 0, SEEK_END); 
+    fseek(fptr, 0, SEEK_END); 
     if(fptr == NULL)
     {
       perror("Error!");
