@@ -94,35 +94,24 @@ int clear()
 
 }
 
+void help()
+{
+	printf("++add or +a to add file\n");
+	printf("++paste or +p to paste file\n");
+	printf("++list or +l to list all the copied files\n");
+	printf("++modify or +m to modify the copied files\n");
+	printf("++remove or +r to remove the copied files\n");
+	printf("++clear or +c to clear contents copied files\n");
+}
 int main(int argc,char *argv[])
 {
     int ReturnVal=-1,n=1;
     if(argc<=1)
     {
-        printf("\n%s requires at least one argument.\nPlease try %1$s --help for more information.\n",argv[0]);
+        printf("\n%s requires at least one argument.\nPlease try %1$s ++help for more information.\n",argv[0]);
         return 0;
     }
     char choice[10];
-    for(int i= 1;i<argc;i++)
-    {
-        if(strcmp(argv[n],"--shoot")==0)
-        strcpy(choice,argv[n]);
-        if((!strcmp(choice,"--cp"))||(!strcmp(choice,"--mv"))||(!strcmp(choice,"--paste")))
-        {
-            if(!strcmp(choice,"--mv"))
-                paste_mode=true;
-            ReturnVal=paste(argc,argv,n);
-        }
-        else if()
-            ReturnVal=paste(argc,argv,n);
-        else if(strcmp(choice,"-clr")==0)
-            ReturnVal=clear();
-        else
-        {
-            /* code */
-        } 
-    }
-    printf("Return Value = %d",ReturnVal);
     return 0;
 }
 
