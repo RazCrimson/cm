@@ -8,9 +8,9 @@
 
 const char str[]="./myfile.txt"
 
-static bool paste_mode=false;
-static bool absolute_path=true;
+static bool move_paste=false;
 static bool copy_move=false;
+static bool absolute_path=true;
 
 int path(char *cwd) {
     if (getcwd(cwd, PATH_MAX) != NULL)
@@ -53,7 +53,7 @@ int add(int argc, char *argv[],int n)
         path(source_path);
         fprintf(fptr," cd %s &&",source_path);
 	}
-	if(paste_mode==true)
+	if(move_paste==true)
 		fprintf(fptr,"mv ");
 	else
 		fprintf(fptr,"cp ");
@@ -81,7 +81,7 @@ int paste(int argc, char *argv[],int n)
     {
         fscanf(fptr,"%[^\n]s",arr);
         strcat(arr,dest_path+2);
-        if(paste_mode==true)
+        if(move_paste==true)
             *arr=str_replace(arr, "&&cp", "&&mv")
 	    system(arr);
 	    printf("%s\n",arr);
