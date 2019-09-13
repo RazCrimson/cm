@@ -1,16 +1,18 @@
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
+#include <unistd.h>
 #include <stdlib.h>
 
-char *str_replace(char *orig, char *rep, char *with) 
+char *str_replace(char *orig, char *rep, char *with)
 {
-    char *result; // the return string
-    char *ins;    // the next insert point
-    char *tmp;    // varies
-    int len_rep;  // length of rep (the string to remove)
-    int len_with; // length of with (the string to replace rep with)
+    char *result;  // the return string
+    char *ins;     // the next insert point
+    char *tmp;     // varies
+    int len_rep;   // length of rep (the string to remove)
+    int len_with;  // length of with (the string to replace rep with)
     int len_front; // distance between rep and end of last rep
-    int count;    // number of replacements
+    int count;     // number of replacements
 
     // sanity checks and initialization
     if (!orig || !rep)
@@ -24,11 +26,10 @@ char *str_replace(char *orig, char *rep, char *with)
 
     // count the number of replacements needed
     ins = orig;
-    for (count = 0; tmp = strstr(ins, rep); ++count) {
+    for (count = 0; (tmp = strstr(ins, rep)); ++count)
         ins = tmp + len_rep;
-    }
 
-    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+    tmp = result = (char *)malloc(strlen(orig) + (len_with - len_rep) * count + 1);
 
     if (!result)
         return NULL;
@@ -38,7 +39,8 @@ char *str_replace(char *orig, char *rep, char *with)
     //    tmp points to the end of the result string
     //    ins points to the next occurrence of rep in orig
     //    orig points to the remainder of orig after "end of rep"
-    while (count--) {
+    while (count--)
+    {
         ins = strstr(orig, rep);
         len_front = ins - orig;
         tmp = strncpy(tmp, orig, len_front) + len_front;
@@ -51,7 +53,7 @@ char *str_replace(char *orig, char *rep, char *with)
 
 int cwd_path(char *cwd)
 {
-    if (getcwd(cwd, PATH_MAX) != NULL)
+    if (getcwd(cwd, _PC_PATH_MAX) != NULL)
         return 0;
     else
     {
@@ -60,34 +62,15 @@ int cwd_path(char *cwd)
     }
 }
 
-int exists(const char *file)
+
+int absolute_path(char *file_path, char *full_path)
 {
-    FILE *fptr;
-    if ((fptr = fopen(file, "r")))
+    char *path = (char *)malloc(sizeof(char) * _PC_PATH_MAX);
+    if (realpath(path, full_path) != NULL)
+        return 0;
+    else
     {
-        fclose(fptr);
-        return 1;
+        printf("\n%s can not be found.",file_path);
+        return -1;
     }
-    return 0;
-}
-
-char * absolute_path(char * file_path)
-{
-    char *path=malloc(sizeof(char)*PATH_MAX)
-    if(file_path[0]=='\\')
-        return file_path;
-
-    else if(file_path[0]=='.')
-    {
-        if(file_path[1]=='.'&&file_path[2]=='/')
-        {
-            path()
-        }
-        else if(file_path[1]=='/')
-        {
-            /* code */
-        }
-        
-    }
-
 }
