@@ -105,27 +105,16 @@ int main(int argc,char *argv[])
     char choice[10];
     for(int i= 1;i<argc;i++)
     {
-        if(strcmp(argv[n],"--shoot")==0)
-        
-        strcpy(choice,argv[n]);
-        if((!strcmp(choice,"--cp"))||(!strcmp(choice,"--mv"))||(!strcmp(choice,"--paste")))
-        {    
-            if(!strcmp(choice,"--mv"))
-                paste_mode=true;
-            ReturnVal=paste(argc,argv,n);
-        }
-        else if()
-            ReturnVal=paste(argc,argv,n);
-        else if(strcmp(choice,"-clr")==0)
-            ReturnVal=clear();
-        else
-        {
-            /* code */
-        }
-            
-    }
-    printf("Return Value = %d",ReturnVal);
+	strcpy(choice,argv[i]);
+	if(choice[0]!='+')
+		break;
+	else if(choice[1]=='+')
+		{
+		}
+	else
+		{
+		}
+	}
     return 0;
-    
 }
 
