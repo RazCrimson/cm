@@ -23,7 +23,6 @@ int line();
 int shoot = 0;
 void initialise()
 {
-    int i = 0, j = 0;
     l = line();
     count = (int *)calloc(l, sizeof(int));
     str = (char ***)calloc(l, sizeof(char));
@@ -157,7 +156,7 @@ int list(char *options) //options can be a range or a single number
 
 int remove_line(char *options) //options can be a range or a single number
 {
-    int l1, l2 = 0, k = 0, len = 0, start = 0;
+    int l1,l2=0,p=0,len=0,start=0;
     void initialise();
     if (options[0] == '-')
     {
@@ -170,19 +169,18 @@ int remove_line(char *options) //options can be a range or a single number
         {
             if (options[i] == '-')
             {
-                k = i;
+                p=i;
                 break;
             }
         }
     }
-    else
-        return -1;
-    for (i = 1; i < k; i++)
+    else return -1;
+    for(i=1;i<p;i++)
     {
         if (!isdigit(options[i]))
             return -1;
     }
-    for (i = k + 1; options[i] != '\0'; i++)
+    for(i=p+1;options[i]!='\0';i++)
     {
         if (!isdigit(options[i]))
             return -1;
@@ -190,10 +188,10 @@ int remove_line(char *options) //options can be a range or a single number
     l1 = atoi(options);
     if (l1 <= 0 || l1 > l)
         return -1;
-    if (k)
+    if(p)
     {
-        l2 = atoi(k + 1);
-        if (l2 < l1 || l2 >= l)
+        l2=atoi(options[p+1]);
+        if(l2<l1||l2>=l)
             return -1;
     }
     if (l2 == 0)
@@ -222,7 +220,8 @@ int remove_line(char *options) //options can be a range or a single number
     {
         count[i - len] = count[i];
     }
-    l = l - len;
+    l=l-len;
+    clear();
     for (i = 0; i < l; i++)
     {
         for (j = 0; j < count[i]; j++)
@@ -239,7 +238,6 @@ int remove_line(char *options) //options can be a range or a single number
 int modify(int argc, char *argv[], int n, int opt1, int opt2) //options can be a range or a single number
 {
 
-    int i = 0, j = 0, k = 0;
     if (opt2 == -1) // clearing all the lines and replacing them
     {
         int temp = argc - n;
@@ -289,7 +287,6 @@ int execute() //All the execution of the functions r gonna be made here
 
 int main(int argc, char *argv[])
 {
-    int n = 1, j;
     if (argc <= 1)
     {
         printf("\n%s requires at least one argument.\nPlease try %s ++help for more information.\n", argv[0], argv[0]);
