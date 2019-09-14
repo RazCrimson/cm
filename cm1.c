@@ -8,12 +8,12 @@
 #include "temp.h"
 int line();
 
-const char myfile[] = "rsclipboard.txt";
+const char myfile[] = "/root/Desktop/cm/clipboard";
 
 FILE *fptr;
 
 int n = 1, l = 0, *count;
-char*** str;
+char ***str;
 static bool function_mode = false; // False in function_mode indicates that the execution is for adding into clipboard
 static bool copy_move = false;     // False in copy_move is to sent copy and true for moving
 
@@ -22,7 +22,7 @@ int line();
 int shoot = 0;
 void initialise()
 {
-    int i=0,j=0;
+    int i = 0, j = 0;
     l = line();
     count = (int *)calloc(l, sizeof(int));
     str = (char ***)calloc(l, sizeof(char));
@@ -47,7 +47,7 @@ void initialise()
     {
         for (j = 0; getc(fptr) != '\n'; j++)
         {
-            fscanf(fptr,"%s", &str[i][j]);
+            fscanf(fptr, "%s", &str[i][j][0]);
         }
     }
 }
@@ -131,7 +131,7 @@ int line()
     fptr = fopen(myfile, "r");
     while (getc(fptr) != EOF)
     {
-        fscanf(fptr,"%c", &ch);
+        fscanf(fptr, "%c", &ch);
         if (ch == '\n')
             count++;
     }
@@ -161,22 +161,21 @@ int remove_line(char *options) //options can be a range or a single number
 
 int modify(int argc, char *argv[], int n, int opt1, int opt2) //options can be a range or a single number
 {
-    int i=0,j=0,k=0;
-    if (opt2 == -1)
+    int i = 0, j = 0, k = 0;
+    if (opt2 == -1) // clearing all the lines and replacing them
     {
         int temp = argc - n;
         str[opt1 - 1] = (char **)realloc(str + opt1 - 1, sizeof(char) * temp); //free other memory spaces
 
-        memset(str + opt1 - 1, '\0', temp * PATH_MAX * sizeof(char)); //memset
-        for (int i = 0; i < temp; i++)
-            strcpy(&str[opt1 - 1][0], argv[i + n]);
+        memset(str + opt1 - 1, '\0', temp * PATH_MAX * sizeof(char));
+        for (i = 0; i < temp; i++)
+            strcpy(&str[opt1 - 1][i][0], argv[i + n]);
         count[opt1 - 1] = temp;
     }
     else
     {
         memset(&str[opt1 - 1][opt2 - 1], '\0', PATH_MAX * sizeof(char));
-        for (i = 0; argv[i + n] != '\0'; i++)
-            strcpy(&str[opt1 - 1][opt2 - 1], argv[i + n]);
+        strcpy(&str[opt1 - 1][opt2 - 1][0], argv[i + n]);
     }
     clear();
     for (i = 0; i < l; i++)
