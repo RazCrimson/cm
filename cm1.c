@@ -6,8 +6,8 @@
 #include <unistd.h>
 #include "temp.h"
 
-const char str[] = "./myfile.txt";
-
+const char myfile[] = "./myfile.txt";
+int n=1;
 static bool function_mode = false; // False in function_mode indicates that the execution is for adding into clipboard
 static bool copy_move = false;     // False in copy_move is to sent copy and true for moving
 
@@ -28,7 +28,7 @@ int add(int argc, char *argv[], int n)
 {
     FILE *fptr;
     char full_path[_PC_PATH_MAX];
-    fptr = fopen(str, "w+");
+    fptr = fopen(myfile, "w+");
     fseek(fptr, 0, SEEK_END);
     if (fptr == NULL)
     {
@@ -55,7 +55,7 @@ int paste(int argc, char *argv[], int n)
     FILE *fptr;
     char cmd[10000] = {'\0'};
     char dest_path[_PC_PATH_MAX];
-    fptr = fopen(str, "r+");
+    fptr = fopen(myfile, "r+");
     if (fptr == NULL)
     {
         perror("Error!");
@@ -70,6 +70,7 @@ int paste(int argc, char *argv[], int n)
             system(cmd);
         printf("%s\n", cmd);
     }
+	fclose(fptr);
     return 0;
 }
 
@@ -84,17 +85,34 @@ int clear()
     return 0;
 }
 
+int line()
+{
+	int count;
+	char ch;
+	FILE *fptr;
+	fptr=fopen(myfile,"r");
+	for(getc(fptr)!=EOF)
+	{
+		fscanf("%c",&ch);
+		if(ch=='\n')
+			count++;
+	}
+	fclose(fptr);
+	return count;
+}
+
 int list(char *options) //options can be a range or a single number
 {
     FILE *fptr;
     char string[10000] = {'\0'};
-    fptr = fopen(str, "r");
+    fptr = fopen(myfile, "r");
     if (options == NULL)
         for (int i = 1; getc(fptr) != EOF; i++)
         {
             fscanf(fptr, "%[^\n]s", string);
             printf("%d. %s\n ", i, string);
         }
+	fclose(close);
     return 0;
 }
 
@@ -103,8 +121,47 @@ int remove_line(char *options) //options can be a range or a single number
     return 0;
 }
 
-int modify(int argc, char *argv[], int n, char *options) //options can be a range or a single number
+int modify(int argc, char *argv[], int n, int opt1, int opt2=-1) //options can be a range or a single number
 {
+	FILE *fptr;
+	int l=lines();
+	int *count=(int *)calloc(l,sixeof(int))
+	char *str=(char *)calloc(l,sizeof(char))
+	for(i=0;i<l;i++)
+	{
+		while(getc(fptr)!='\n')
+		{
+			if(getc(fptr)=='\0')
+				count[i]++;
+		}
+	}
+	for(i=0;i<l;i++)
+	{
+		char *(str+i)=(char *)calloc(count[i],sizeof(char));
+		for(j=0;j<count[i];j++)
+		{
+			char *(*(str+i)+j)=(char *)calloc(PATH_MAX,sizeof(char));
+		}
+	}
+	fptr=fopen(myfile,"w+");
+	for(i=0;getc(fptr)!=EOF;i++)
+	{
+		for(j=0;getc(fptr)!='\n';j++)
+		{
+			fscanf("%s",str[i][j]);
+		}
+	}
+	if(opt2==-1)
+	{
+		int temp=argc-n;
+		str[opt1-1]=(char *)realloc(str+opt1-1,sizeof(char)*temp);//free other memory spaces
+	}
+		for(i=0;i<temp;i++)
+		{
+			//memset
+			strcpy(&str[opt1][0],argv[i+n];
+		}
+	}
     return 0;
 }
 
