@@ -222,6 +222,7 @@ int remove_line(char *options) //options can be a range or a single number
         count[i-len]=count[i];    
     }
     l=l-len;
+    clear();
     for (i = 0; i < l; i++)
     {
         for (j = 0; j < count[i]; j++)
