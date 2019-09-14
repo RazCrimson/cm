@@ -5,14 +5,46 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include "temp.h"
+int line();
 
-const char myfile[] = "./myfile.txt";
+const char myfile[] = "rsclipboard.txt";
 int n=1;
 static bool function_mode = false; // False in function_mode indicates that the execution is for adding into clipboard
 static bool copy_move = false;     // False in copy_move is to sent copy and true for moving
 
 int shoot = 0;
+void initialise()
+{
+	extern int l=line();
+        extern int *count=(int *)calloc(l,sizeof(int))
+        extern char ***str;
+        str=(char ***)calloc(l,sizeof(char));
+        fptr=fopen(myfile,"w+");
+        for(i=0;i<l;i++)
+        {
+                while(getc(fptr)!='\n')
+                {
+                        if(getc(fptr)=='\0')
+                                count[i]++;
+                }
+        }
+        for(i=0;i<l;i++)
+        {
+                str[i]=(char **)calloc(count[i],sizeof(char));
+                for(j=0;j<count[i];j++)
+                {
+                        str[i][j]=(char *)calloc(PATH_MAX,sizeof(char));
+                }
+        }
+        for(i=0;getc(fptr)!=EOF;i++)
+        {
+                for(j=0;getc(fptr)!='\n';j++)
+                {
+                        fscanf("%s",str[i][j]);
+                }
+        }
 
+}
 int arg1(char ch)
 {
     //if (ch == 'a')
@@ -77,9 +109,9 @@ int paste(int argc, char *argv[], int n)
 int clear()
 {
     char cmd[50] = "rm ";
-    strcat(cmd, str);
+    strcat(cmd, myfile);
     strcat(cmd, "; touch ");
-    strcat(cmd, str);
+    strcat(cmd, myfile);
     system(cmd);
     printf("\nLog cleared.\n");
     return 0;
@@ -124,44 +156,36 @@ int remove_line(char *options) //options can be a range or a single number
 int modify(int argc, char *argv[], int n, int opt1, int opt2=-1) //options can be a range or a single number
 {
 	FILE *fptr;
-	int l=lines();
-	int *count=(int *)calloc(l,sixeof(int))
-	char *str=(char *)calloc(l,sizeof(char))
-	for(i=0;i<l;i++)
-	{
-		while(getc(fptr)!='\n')
-		{
-			if(getc(fptr)=='\0')
-				count[i]++;
-		}
-	}
-	for(i=0;i<l;i++)
-	{
-		char *(str+i)=(char *)calloc(count[i],sizeof(char));
-		for(j=0;j<count[i];j++)
-		{
-			char *(*(str+i)+j)=(char *)calloc(PATH_MAX,sizeof(char));
-		}
-	}
-	fptr=fopen(myfile,"w+");
-	for(i=0;getc(fptr)!=EOF;i++)
-	{
-		for(j=0;getc(fptr)!='\n';j++)
-		{
-			fscanf("%s",str[i][j]);
-		}
-	}
 	if(opt2==-1)
 	{
 		int temp=argc-n;
-		str[opt1-1]=(char *)realloc(str+opt1-1,sizeof(char)*temp);//free other memory spaces
-	}
+		str[opt1-1]=(char **)realloc(str+opt1-1,sizeof(char)*temp);//free other memory spaces
+
+		memset(str+opt1-1,'\0',temp*PATH_MAX*sizeof(char));//memset
 		for(i=0;i<temp;i++)
-		{
-			//memset
-			strcpy(&str[opt1][0],argv[i+n];
-		}
+			strcpy(&str[opt1-1][0],argv[i+n]);
+		count[opt1-1]=temp;
 	}
+	else
+	{
+		memset(&str[opt1-1][opt2-1],'\0',PATH_MAX*sizeof(char));
+		for(i=0;arg[i+n]!='\0';i++)
+			strcpy(&str[opt-1][opt2-1],argv[i+n]);
+	}
+	clear();
+	for(i=0;i<l;i++)
+	{
+		for(j=0;j<count[i];j++)
+		{
+			for(k=0;str[i][j][k]!='\0';k++)
+			{
+				fprintf(fptr,"%c",str[i][j][k]);
+			}
+			fprintf(fptr,'\0');
+		}
+		fprintf(fptr,"\n");
+	}
+	fclose(fptr);
     return 0;
 }
 
