@@ -191,7 +191,7 @@ int remove_line(char *options) //options can be a range or a single number
         return -1;
     if(k)
     {
-        l2=atoi(k+1);
+        l2=atoi(options[k+1]);
         if(l2<l1||l2>=l)
             return -1;
     }
