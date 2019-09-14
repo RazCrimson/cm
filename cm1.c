@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <ctype.h>
 #include "temp.h"
 int line();
 
@@ -11,7 +12,7 @@ const char myfile[] = "rsclipboard.txt";
 
 FILE *fptr;
 
-int n = 1, l = 0, *count;
+int i,j,k,n = 1, l = 0, *count;
 char ***str;
 static bool function_mode = false; // False in function_mode indicates that the execution is for adding into clipboard
 static bool copy_move = false;     // False in copy_move is to sent copy and true for moving
@@ -155,12 +156,90 @@ int list(char *options) //options can be a range or a single number
 
 int remove_line(char *options) //options can be a range or a single number
 {
-    return 0;
+    int l1,l2=0,k=0,len=0,start=0;
+    void initialise();
+    if(options[0]=='-')
+    {
+        clear();
+        return 0;
+    }
+    else if(isdigit(options[0]))
+    {
+        for(i=1;options[i]!='\0';i++)
+        {
+            if(options[i]=='-')
+            {
+                k=i;
+                break;
+            }
+        }
+    }
+    else return -1;
+    for(i=1;i<k;i++)
+    {
+        if(!isdigit(options[i]))
+            return -1;
+    }
+    for(i=k+1;options[i]!='\0';i++)
+    {
+        if(!isdigit(options[i]))
+            return -1;
+    }
+    l1=atoi(options);
+    if(l1<=0||l1>l)
+        return -1;
+    if(k)
+    {
+        l2=atoi(k+1);
+        if(l2<l1||l2>=l)
+            return -1;
+    }
+    if(l2==0)
+    {
+        len=1;
+        start=l1;
+    }
+    else
+    {
+        len=l2-l1+1;
+        start=l2;
+    }
+    for(i=start;i<l;i++)
+    {
+        str[i-len]=(char **)realloc(str+i-len,count[i]*sizeof(char));
+        memset(str+i-len,'\0',count[i]*PATH_MAX*sizeof(char));
+        for(j=0;j<count[i];j++)
+        {
+            for(k=0;k<PATH_MAX;k++)
+            {
+                str[i-len][j][k]=str[i][j][k];
+            }
+        }
+    }
+    for(i=start;i<l;i++)
+    {
+        count[i-len]=count[i];    
+    }
+    l=l-len;
+    for (i = 0; i < l; i++)
+    {
+        for (j = 0; j < count[i]; j++)
+        {
+            for (k = 0; str[i][j][k] != '\0'; k++)
+            {
+                fprintf(fptr, "%c", str[i][j][k]);
+            }
+            fprintf(fptr, '\0');
+        }
+        fprintf(fptr, "\n");
+    }
+    fclose(fptr);
+    
 }
 
 int modify(int argc, char *argv[], int n, int opt1, int opt2 = -1) //options can be a range or a single number
 {
-
+    initialise();
     if (opt2 == -1)
     {
         int temp = argc - n;
