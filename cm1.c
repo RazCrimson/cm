@@ -1,3 +1,4 @@
+#define PATH_MAX _PC_PATH_MAX
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -12,7 +13,7 @@ const char myfile[] = "rsclipboard.txt";
 FILE *fptr;
 
 int n = 1, l = 0, *count;
-char ***str;
+char*** str;
 static bool function_mode = false; // False in function_mode indicates that the execution is for adding into clipboard
 static bool copy_move = false;     // False in copy_move is to sent copy and true for moving
 
@@ -46,7 +47,7 @@ void initialise()
     {
         for (j = 0; getc(fptr) != '\n'; j++)
         {
-            fscanf("%s", &str[i][j]);
+            fscanf(fptr,"%s", &str[i][j]);
         }
     }
 }
@@ -128,9 +129,9 @@ int line()
     char ch;
 
     fptr = fopen(myfile, "r");
-    for (getc(fptr) != EOF)
+    while (getc(fptr) != EOF)
     {
-        fscanf("%c", &ch);
+        fscanf(fptr,"%c", &ch);
         if (ch == '\n')
             count++;
     }
@@ -149,7 +150,7 @@ int list(char *options) //options can be a range or a single number
             fscanf(fptr, "%[^\n]s", string);
             printf("%d. %s\n ", i, string);
         }
-    fclose(close);
+    fclose(fptr);
     return 0;
 }
 
@@ -158,24 +159,24 @@ int remove_line(char *options) //options can be a range or a single number
     return 0;
 }
 
-int modify(int argc, char *argv[], int n, int opt1, int opt2 = -1) //options can be a range or a single number
+int modify(int argc, char *argv[], int n, int opt1, int opt2) //options can be a range or a single number
 {
-
+    int i=0,j=0,k=0;
     if (opt2 == -1)
     {
         int temp = argc - n;
         str[opt1 - 1] = (char **)realloc(str + opt1 - 1, sizeof(char) * temp); //free other memory spaces
 
         memset(str + opt1 - 1, '\0', temp * PATH_MAX * sizeof(char)); //memset
-        for (i = 0; i < temp; i++)
+        for (int i = 0; i < temp; i++)
             strcpy(&str[opt1 - 1][0], argv[i + n]);
         count[opt1 - 1] = temp;
     }
     else
     {
         memset(&str[opt1 - 1][opt2 - 1], '\0', PATH_MAX * sizeof(char));
-        for (i = 0; arg[i + n] != '\0'; i++)
-            strcpy(&str[opt - 1][opt2 - 1], argv[i + n]);
+        for (i = 0; argv[i + n] != '\0'; i++)
+            strcpy(&str[opt1 - 1][opt2 - 1], argv[i + n]);
     }
     clear();
     for (i = 0; i < l; i++)
@@ -186,7 +187,7 @@ int modify(int argc, char *argv[], int n, int opt1, int opt2 = -1) //options can
             {
                 fprintf(fptr, "%c", str[i][j][k]);
             }
-            fprintf(fptr, '\0');
+            fprintf(fptr, 0);
         }
         fprintf(fptr, "\n");
     }
