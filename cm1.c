@@ -10,13 +10,12 @@
 
 const char myfile[] = "clipboard_path_added_by_bash_script";
 
-FILE *fptr,*sptr,*dptr;
+FILE *fptr, *sptr, *dptr;
 
 int i, j, k, n = 1, l = 0, *count;
 char ***str;
 static bool function_mode = false; // False in function_mode indicates that the execution is for adding into clipboard
-static bool move = false;     // False in copy_move is to sent copy and true for moving
-
+static bool move = false;          // False in copy_move is to sent copy and true for moving
 
 int line()
 {
@@ -44,7 +43,7 @@ void initialise()
     {
         while (getc(fptr) != '\n')
         {
-             if (getc(fptr) == '\0')
+            if (getc(fptr) == '\0')
                 count[i]++;
         }
     }
@@ -65,7 +64,7 @@ void initialise()
     }
 }
 int arg1(char ch)
-{ 
+{
     //if (ch == 'a')
     return 0;
 }
@@ -101,43 +100,81 @@ int add(int argc, char *argv[], int n)
     return 0;
 }
 
-int copy_file(char* source_path,char* dest_path)
+int copy_file(char *source_path, char *dest_path)
 {
-    char *prevptr,*ptr=source_path,ch;
-    sptr=fopen(source_path,"r");
-    while( (ptr = strstr(ptr,"/")))
+    char *prevptr, *ptr = source_path, ch;
+    sptr = fopen(source_path, "r");
+    while ((ptr = strstr(ptr, "/")))
         prevptr = ptr++;
-    strcat(dest_path,prevptr);   
-    dptr=fopen(dest_path,"r");
-    re:
-    if(dptr!=NULL)
+    strcat(dest_path, prevptr);
+    dptr = fopen(dest_path, "r");
+re:
+    if (dptr != NULL)
         printf("\n%s file exists in directory. Would you like to overwrite it (y/n) ? ");
-        scanf("%c",&ch);
-        tolower(ch);
-        if(ch=='n')
-            return -1;
-        else if(ch=='y')
-            {
-                if((remove(dest_path))!=0)
-                    printf("\nThe File cannot be deleted.");
-                return -1;
-            }
-        else
-            printf("\nPlease enter a Valid option.");
-            goto re;
-    dptr=fopen(dest_path,"w+");
-    while ((ch  = fgetc(sptr)) != EOF)
+    scanf("%c", &ch);
+    tolower(ch);
+    if (ch == 'n')
+        return -1;
+    else if (ch == 'y')
+    {
+        if ((remove(dest_path)) != 0)
+            printf("\nThe File cannot be deleted.");
+        return -1;
+    }
+    else
+        printf("\nPlease enter a Valid option.");
+    goto re;
+    dptr = fopen(dest_path, "w+");
+    while ((ch = fgetc(sptr)) != EOF)
         fputc(ch, dptr);
     if (move == true)
-        remove(source_path);            
+        remove(source_path);
     return 0;
 }
 
-int paste(int argc, char *argv[], int n)
+int paste(char *options, char *dest_main)
 {
+    
+    int l1 = 0, l2 = 0, p = -1;
+    initialise();
+    if (options[0] == '-')
+    {
+        clear();
+        return 0;
+    }
+    else if (isdigit(options[0]))
+    {
+        for (i = 1; options[i] != '\0'; i++)
+        {
+            if (options[i] == '-')
+            {
+                if (p != -1)
+                    return -1;
+                p = i;
+            }
+            else if (!isdigit(options[i]))
+                return -1;
+        }
+    }
+    else
+        return -1;
+    l1 = atoi(options);
+    if (l1 <= 0 || l1 > l)
+        return -1;
+    if (p != -1)
+    {
+        l2 = atoi(&options[p + 1]);
+        if (l2 < l1 || l2 >= l)
+            return -1;
+    }
+    //////
     char source_path[10000] = {'\0'};
-    char dest_path[_PC_PATH_MAX];
-    cwd_path(dest_path);
+    char *dest_path = (char *)malloc(sizeof(char) * _PC_PATH_MAX);
+    if (dest_main != NULL)
+        dest_path = dest_main;
+    else
+        cwd_path(dest_path);
+
     fptr = fopen(myfile, "r+");
     if (fptr == NULL)
     {
@@ -147,7 +184,7 @@ int paste(int argc, char *argv[], int n)
     while (getc(fptr) != EOF)
     {
         fscanf(fptr, "%s", source_path); // Need a dynamic arry and string concate
-        copy_file(source_path,dest_path);
+        copy_file(source_path, dest_path);
     }
     fclose(fptr);
     return 0;
@@ -156,7 +193,7 @@ int paste(int argc, char *argv[], int n)
 int clear()
 {
     remove(myfile);
-    fptr=fopen(myfile,"wb+");
+    fptr = fopen(myfile, "wb+");
     fclose(fptr);
     return 0;
 }
@@ -177,7 +214,7 @@ int list(char *options) //options can be a range or a single number
 
 int remove_line(char *options) //options can be a range or a single number
 {
-    int l1=0,l2=0,p=-1,len=0,start=0;
+    int l1 = 0, l2 = 0, p = -1, len = 0, start = 0;
     initialise();
     if (options[0] == '-')
     {
@@ -190,15 +227,16 @@ int remove_line(char *options) //options can be a range or a single number
         {
             if (options[i] == '-')
             {
-                if(p!=-1)
+                if (p != -1)
                     return -1;
-                p=i;
+                p = i;
             }
-            else if(!isdigit(options[i]))
+            else if (!isdigit(options[i]))
                 return -1;
         }
     }
-    else return -1;
+    else
+        return -1;
     /*for(i=1;i<p;i++)
     {
         if (!isdigit(options[i]))
@@ -212,10 +250,10 @@ int remove_line(char *options) //options can be a range or a single number
     l1 = atoi(options);
     if (l1 <= 0 || l1 > l)
         return -1;
-    if(p)
+    if (p != -1)
     {
-        l2=atoi(&options[p+1]);
-        if(l2<l1||l2>=l)
+        l2 = atoi(&options[p + 1]);
+        if (l2 < l1 || l2 >= l)
             return -1;
     }
     if (l2 == 0)
@@ -230,8 +268,13 @@ int remove_line(char *options) //options can be a range or a single number
     }
     for (i = start; i < l; i++)
     {
-        str[i - len] = (char **)realloc(str + i - len, count[i] * sizeof(char));
-        memset(str + i - len, '\0', count[i] * PATH_MAX * sizeof(char));
+        str[i - len] = (char **)realloc(&str[i - len], count[i] * sizeof(char));
+        for (int j = 0; j < count[i]; j++)
+        {
+            str[i - len][j] = (char *)realloc(&str[i - len][j][0], PATH_MAX * sizeof(char));
+            memset(&str[i][j][0], '\0', PATH_MAX * sizeof(char));
+        }
+        //memset(str + i - len, '\0', count[i] * PATH_MAX * sizeof(char));
         for (j = 0; j < count[i]; j++)
         {
             for (k = 0; k < PATH_MAX; k++)
@@ -244,7 +287,7 @@ int remove_line(char *options) //options can be a range or a single number
     {
         count[i - len] = count[i];
     }
-    l=l-len;
+    l = l - len;
     clear();
     for (i = 0; i < l; i++)
     {
