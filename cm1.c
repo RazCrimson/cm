@@ -11,12 +11,12 @@ int line();
 
 const char myfile[] = "clipboard_path_added_by_bash_script";
 
-FILE *fptr;
+FILE *fptr,*sptr,*dptr;
 
 int i, j, k, n = 1, l = 0, *count;
 char ***str;
 static bool function_mode = false; // False in function_mode indicates that the execution is for adding into clipboard
-static bool copy_move = false;     // False in copy_move is to sent copy and true for moving
+static bool move = false;     // False in copy_move is to sent copy and true for moving
 
 int line();
 
@@ -88,11 +88,44 @@ int add(int argc, char *argv[], int n)
     return 0;
 }
 
+int copy_file(char* source_path,char* dest_path)
+{
+    char *prevptr,*ptr=source_path;
+    sptr=fopen(source_path,"r");
+    while( (ptr = strstr(ptr,"/")))
+        prevptr = ptr++;
+    strcat(dest_path,prevptr);   
+    dptr=fopen(dest_path,"r");
+    re:
+    if(dptr!=NULL)
+        char ch;
+        printf("\n%s file exists in directory. Would you like to overwrite it (y/n) ? ");
+        scanf("%c",&ch);
+        tolower(ch);
+        if(ch=='n')
+            return -1;
+        else if(ch=='y')
+            {
+                if((remove(dest_path))!=0)
+                    printf("\nThe File cannot be deleted.");
+                continue;
+            }
+        else
+            printf("\nPlease enter a Valid option.")
+            goto re;
+    dptr=fopen(dest_path,"w+");
+    while ((ch = fgetc(sptr)) != EOF)
+        fputc(ch, dptr);
+    if (move == true)
+        remove(source_path);            
+    return 0;
+}
+
 int paste(int argc, char *argv[], int n)
 {
-
-    char cmd[10000] = {'\0'};
+    char source_path[10000] = {'\0'};
     char dest_path[_PC_PATH_MAX];
+    cwd_path(dest_path);
     fptr = fopen(myfile, "r+");
     if (fptr == NULL)
     {
@@ -101,12 +134,8 @@ int paste(int argc, char *argv[], int n)
     }
     while (getc(fptr) != EOF)
     {
-        fscanf(fptr, "%[^\n]s", dest_path); // Need a dynamic arry and string concate
-        strcat(cmd, dest_path + 2);
-        if (copy_move == true)
-            //*arr = str_replace(arr, "&&cp", "&&mv");
-            system(cmd);
-        printf("%s\n", cmd);
+        fscanf(fptr, "%s", source_path); // Need a dynamic arry and string concate
+        copy_file(source_path,dest_path);
     }
     fclose(fptr);
     return 0;
@@ -114,12 +143,9 @@ int paste(int argc, char *argv[], int n)
 
 int clear()
 {
-    char cmd[50] = "rm ";
-    strcat(cmd, myfile);
-    strcat(cmd, "; touch ");
-    strcat(cmd, myfile);
-    system(cmd);
-    printf("\nLog cleared.\n");
+    remove(myfile);
+    fptr=fopen(myfile,"wb+");
+    fclose(fptr);
     return 0;
 }
 
