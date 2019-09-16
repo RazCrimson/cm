@@ -72,5 +72,5 @@ int absolute_path(char *file_path, char *full_path)
     {
         printf("\n%s can not be found.",file_path);
         return -1;
-    }
+}
 }
