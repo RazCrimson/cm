@@ -198,7 +198,7 @@ int remove_line(char *options) //options can be a range or a single number
                 return -1;
         }
     }
-    //else return -1;
+    else return -1;
     /*for(i=1;i<p;i++)
     {
         if (!isdigit(options[i]))
