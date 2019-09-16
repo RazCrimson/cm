@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <ctype.h>
 #include "temp.h"
-int line();
 
 const char myfile[] = "clipboard_path_added_by_bash_script";
 
@@ -18,9 +17,23 @@ char ***str;
 static bool function_mode = false; // False in function_mode indicates that the execution is for adding into clipboard
 static bool move = false;     // False in copy_move is to sent copy and true for moving
 
-int line();
 
-int shoot = 0;
+int line()
+{
+    int count;
+    char ch;
+
+    fptr = fopen(myfile, "r");
+    while (getc(fptr) != EOF)
+    {
+        fscanf(fptr, "%c", &ch);
+        if (ch == '\n')
+            count++;
+    }
+    fclose(fptr);
+    return count;
+}
+
 void initialise()
 {
     l = line();
@@ -31,7 +44,7 @@ void initialise()
     {
         while (getc(fptr) != '\n')
         {
-            if (getc(fptr) == '\0')
+             if (getc(fptr) == '\0')
                 count[i]++;
         }
     }
@@ -52,7 +65,7 @@ void initialise()
     }
 }
 int arg1(char ch)
-{
+{ 
     //if (ch == 'a')
     return 0;
 }
@@ -73,7 +86,7 @@ int add(int argc, char *argv[], int n)
         perror("Error!");
         exit(1);
     }
-    if (copy_move == true)
+    if (move == true)
         fprintf(fptr, "mv ");
     else
         fprintf(fptr, "cp ");
@@ -90,7 +103,7 @@ int add(int argc, char *argv[], int n)
 
 int copy_file(char* source_path,char* dest_path)
 {
-    char *prevptr,*ptr=source_path;
+    char *prevptr,*ptr=source_path,ch;
     sptr=fopen(source_path,"r");
     while( (ptr = strstr(ptr,"/")))
         prevptr = ptr++;
@@ -98,7 +111,6 @@ int copy_file(char* source_path,char* dest_path)
     dptr=fopen(dest_path,"r");
     re:
     if(dptr!=NULL)
-        char ch;
         printf("\n%s file exists in directory. Would you like to overwrite it (y/n) ? ");
         scanf("%c",&ch);
         tolower(ch);
@@ -108,13 +120,13 @@ int copy_file(char* source_path,char* dest_path)
             {
                 if((remove(dest_path))!=0)
                     printf("\nThe File cannot be deleted.");
-                continue;
+                return -1;
             }
         else
-            printf("\nPlease enter a Valid option.")
+            printf("\nPlease enter a Valid option.");
             goto re;
     dptr=fopen(dest_path,"w+");
-    while ((ch = fgetc(sptr)) != EOF)
+    while ((ch  = fgetc(sptr)) != EOF)
         fputc(ch, dptr);
     if (move == true)
         remove(source_path);            
@@ -148,23 +160,6 @@ int clear()
     fclose(fptr);
     return 0;
 }
-
-int line()
-{
-    int count;
-    char ch;
-
-    fptr = fopen(myfile, "r");
-    while (getc(fptr) != EOF)
-    {
-        fscanf(fptr, "%c", &ch);
-        if (ch == '\n')
-            count++;
-    }
-    fclose(fptr);
-    return count;
-}
-
 int list(char *options) //options can be a range or a single number
 {
 
@@ -182,8 +177,8 @@ int list(char *options) //options can be a range or a single number
 
 int remove_line(char *options) //options can be a range or a single number
 {
-    int l1,l2=0,p=-1,len=0,start=0;
-    void initialise();
+    int l1=0,l2=0,p=-1,len=0,start=0;
+    initialise();
     if (options[0] == '-')
     {
         clear();
@@ -203,7 +198,7 @@ int remove_line(char *options) //options can be a range or a single number
                 return -1;
         }
     }
-    else return -1;
+    //else return -1;
     /*for(i=1;i<p;i++)
     {
         if (!isdigit(options[i]))
