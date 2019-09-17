@@ -104,7 +104,7 @@ int paste(int argc, char *argv[], int n)
         fscanf(fptr, "%[^\n]s", dest_path); // Need a dynamic arry and string concate
         strcat(cmd, dest_path + 2);
         if (copy_move == true)
-            //*arr = str_replace(arr, "&&cp", "&&mv");
+            arr = str_replace(arr, "&&cp", "&&mv");
             system(cmd);
         printf("%s\n", cmd);
     }
