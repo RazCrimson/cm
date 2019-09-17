@@ -16,6 +16,11 @@ int i, j, k, n = 1, l = 0, *count;
 char ***str;
 static bool function_mode = false; // False in function_mode indicates that the execution is for adding into clipboard
 static bool move = false;          // False in copy_move is to sent copy and true for moving
+static bool mod_var = false;
+static bool list_var = false;
+static bool clr_var = false;
+static bool help_var = false;
+static bool rem_var = false;
 
 int line()
 {
@@ -65,12 +70,37 @@ void initialise()
 }
 int arg1(char ch)
 {
-    //if (ch == 'a')
+    if (ch == 'm')
+        move=true;
+    else if(ch=='l')
+        list_var=true;
+    else if(ch=='h')
+        help_var=true;
+    else if(ch=='c')
+        clr_var=true;
+    else if(ch=='r')
+        rem_var=true;
+    else if(ch=='x')
+        move=true;
+    
     return 0;
 }
 
 int arg2(const char *choice)
 {
+    if(strcmp(choice[2],"modify")==0)
+        mod_var=true;
+    else if(strcmp(choice[2],"list")==0)
+        list_var=true;
+    else if(strcmp(choice[2],"clear")==0)
+        clr_var=true;
+    else if(strcmp(choice[2],"help")==0)
+        help_var=true;
+    else if(strcmp(choice[2],"remove")==0)
+        rem_var=true;
+    else if(strcmp(choice[2],"move")==0)
+        move=true;
+    
     return 0;
 }
 
@@ -372,7 +402,7 @@ int main(int argc, char *argv[])
         else
         {
             for (j = 1; choice[j] != '\0'; j++)
-                arg1(choice[j]);
+                arg1(choice[j]); 
         }
     }
     execute();
