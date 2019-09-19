@@ -71,7 +71,7 @@ void initialise()
 int arg1(char ch)
 {
     if (ch == 'm')
-        move=true;
+        mod_var=true;
     else if(ch=='l')
         list_var=true;
     else if(ch=='h')
