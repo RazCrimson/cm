@@ -106,7 +106,7 @@ int find_lines(char* options, int* line_start,int* line_end)
     if (p != -1)
     {
         *line_end = atoi(&options[p + 1]);
-        if (*line_end < *line_start || line_end >= l)
+        if (*line_end < *line_start || *line_end >= l)
             return -1;
     }
     return 0;

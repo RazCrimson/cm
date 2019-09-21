@@ -94,7 +94,7 @@ int arg1(char ch)
 
 int arg2(const char *choice)
 {
-    if(strcmp(choice[2],"modify")==0)
+    if(strcmp(&choice[2],"modify")==0)
     {
         if(CURRENT_RUN==NONE)
             CURRENT_RUN=MODIFY;
@@ -104,13 +104,13 @@ int arg2(const char *choice)
             exit(-1);
         }
     }
-    else if(strcmp(choice[2],"list")==0)
+    else if(strcmp(&choice[2],"list")==0)
         list_var=true;
-    else if(strcmp(choice[2],"help")==0)
+    else if(strcmp(&choice[2],"help")==0)
         help_var=true;
-    else if(strcmp(choice[2],"remove")==0)
+    else if(strcmp(&choice[2],"remove")==0)
         rem_var=true;
-    else if(strcmp(choice[2],"move")==0)
+    else if(strcmp(&choice[2],"move")==0)
         move=true;
     
     return 0;
@@ -195,13 +195,13 @@ int paste(int l1,int l2, char *dest_main)
         copy_file(source_path, dest_path);
     }
     fclose(fptr);*/
-    if(l1!=NULL)
+    if(l1!=0)
         while(--l1)
         {
             fscanf(fptr,"%[^\n]s ",source_path);
-            if(l2!=NULL)
+            if(l2!=0)
                 l2--;
-            if(get(fptr)==EOF)
+            if(getc(fptr)==EOF)
             {
                 printf("ERROR the lines specified exccced the no. of entries");
                 exit(-1);
@@ -213,7 +213,7 @@ int paste(int l1,int l2, char *dest_main)
         fscanf(fptr, "%[^\n]s", source_path+3); // Need a dynamic arry and string concate
         strcat(source_path,dest_path);
         system(source_path);
-        if(l2!=NULL)
+        if(l2!=0)
         {
             if(!(--l2))
                 break;
@@ -246,7 +246,7 @@ int list()
 int remove_line(int l1,int l2)
 {
     int len = 0, start = 0;
-    if(l1==NULL&&l2==NULL)
+    if(l1==0&&l2==0)
     {
         remove(myfile);
         fptr = fopen(myfile, "w+");
@@ -291,7 +291,7 @@ int remove_line(int l1,int l2)
         for (j = 0; j < count[i]; j++)
         {
             fprintf(fptr, "%s", &str[i][j][0]);
-            fprintf(fptr, "\0");
+            fprintf(fptr, " ");
         }
         fprintf(fptr, "\n");
     }
@@ -326,7 +326,7 @@ int modify(int argc, char *argv[], int opt1, int opt2) //options can be a range 
             {
                 fprintf(fptr, "%c", str[i][j][k]);
             }
-            fprintf(fptr, 0);
+            fprintf(fptr, " ");
         }
         fprintf(fptr, "\n");
     }
@@ -347,7 +347,7 @@ void help()
 int execute(int argc, char *argv[]) //All the execution of the functions r gonna be made here
 {
     if(CURRENT_RUN==ADD)
-        add(argc, &argv);
+        add(argc, argv);
     return 0;
 }
 
@@ -374,6 +374,6 @@ int main(int argc, char *argv[])
                 arg1(choice[j]); 
         }
     }
-    execute(argc,&argv);
+    execute(argc,argv);
     return 0;
 }
