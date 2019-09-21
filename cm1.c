@@ -8,6 +8,8 @@
 #include <ctype.h>
 #include "temp.h"
 
+int initialise();
+
 const char myfile[] = "clipboard_path_added_by_bash_script";
 
 FILE *fptr, *sptr, *dptr;
@@ -21,6 +23,42 @@ static bool list_var = false;
 static bool help_var = false;
 static bool rem_var = false;
 
+int find_lines(char* options, int* line_start,int* line_end)
+{
+    int p=-1,l=0;
+    l=initialise();
+    if (options[0] == '-')
+    {
+        clear();
+        return 0;
+    }
+    else if (isdigit(options[0]))
+    {
+        for (i = 1; options[i] != '\0'; i++)
+        {
+            if (options[i] == '-')
+            {
+                if (p != -1)
+                    return -1;
+                p = i;
+            }
+            else if (!isdigit(options[i]))
+                return -1;
+        }
+    }
+    else
+        return -1;
+    *line_start = atoi(options);
+    if (*line_start <= 0 || *line_start > l)
+        return -1;
+    if (p != -1)
+    {
+        *line_end = atoi(&options[p + 1]);
+        if (*line_end < *line_start || line_end >= l)
+            return -1;
+    }
+    return 0;
+}
 int line()
 {
     int count;
@@ -374,6 +412,6 @@ int main(int argc, char *argv[])
                 arg1(choice[j]); 
         }
     }
-    execute(argc,&argv);
+    execute(argc,argv);
     return 0;
 }
