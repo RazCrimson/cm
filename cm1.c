@@ -86,16 +86,21 @@ int line()
 
 int initialise()
 {
+    int l,*count;
+    char ***str;
     l = line();
     count = (int *)calloc(l, sizeof(int));
     str = (char ***)calloc(l, sizeof(char));
-    fptr = fopen(myfile, "w+");
+    fptr = fopen(myfile, "r+");
     for (i = 0; i < l; i++)
     {
-        while (getc(fptr) != '\n')
+
+        while (!feof(fptr))
         {
-            if (getc(fptr) == '\0')
+            if (fgetc(fptr) == ' ')
+            {
                 count[i]++;
+            }
         }
     }
     for (i = 0; i < l; i++)
@@ -106,9 +111,9 @@ int initialise()
             str[i][j] = (char *)calloc(PATH_MAX, sizeof(char));
         }
     }
-    for (i = 0; getc(fptr) != EOF; i++)
+    for (i = 0; fgetc(fptr) != EOF; i++)
     {
-        for (j = 0; getc(fptr) != '\n'; j++)
+        for (j = 0; fgetc(fptr) != '\n'; j++)
         {
             fscanf(fptr, "%s", &str[i][j][0]);
         }
@@ -264,7 +269,7 @@ int paste()
         exit(1);
     }
     /*
-    while (getc(fptr) != EOF)
+    while (fgetc(fptr) != EOF)
     {
         fscanf(fptr, "%s", source_path); // Need a dynamic arry and string concate
         copy_file(source_path, dest_path);
@@ -277,14 +282,14 @@ int paste()
             fscanf(fptr,"%[^\n]s ",source_path);
             if(line_end>0)
                 line_end--;
-            if(getc(fptr)==EOF)
+            if(fgetc(fptr)==EOF)
             {
                 printf("ERROR the lines specified exccced the no. of entries");
                 exit(-1);
             }
         }
     }if (line_end == NULL)
-    while (getc(fptr) != EOF)
+    while (fgetc(fptr) != EOF)
     {
         fscanf(fptr, "%[^\n]s", source_path+3); // Need a dynamic arry and string concate
         strcat(source_path,dest_path);
@@ -306,7 +311,7 @@ int list()
 {
     char string[10000] = {'\0'};
     fptr = fopen(myfile, "r");
-    for (int i = 1; getc(fptr) != EOF; i++)
+    for (int i = 1; fgetc(fptr) != EOF; i++)
     {
         fscanf(fptr, "%[^\n]s", string);
         printf("%d. %s\n ", i, string);
