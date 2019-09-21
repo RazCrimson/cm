@@ -163,8 +163,7 @@ int arg2(const char *choice)
 
 int add(int argc, char *argv[])
 {
-    printf("ADD Executerd");
-    char full_path[_PC_PATH_MAX];
+    char full_path[10000];
     fptr = fopen(myfile, "w+");
     fseek(fptr, 0, SEEK_END);
     if (fptr == NULL)
@@ -183,7 +182,6 @@ int add(int argc, char *argv[])
     }
     fprintf(fptr, "%c", '\n');
     fclose(fptr);
-    printf("\nFile Closed\n");
     return 0;
 }
 
@@ -291,14 +289,14 @@ int list()
 int remove_line(int l1,int l2)
 {
     int len = 0, start = 0;
-    if(l1==0&&l2==0)
+    if(l1==NULL&&l2==NULL)
     {
         remove(myfile);
         fptr = fopen(myfile, "w+");
         fclose(fptr);
         return 0;
     }
-    if (l2 == 0)
+    if (l2 == NULL)
     {
         len = 1;
         start = l1;
@@ -392,8 +390,7 @@ void help()
 int execute(int argc, char *argv[]) //All the execution of the functions r gonna be made here
 {
     if(CURRENT_RUN==ADD)
-        printf("add return %d",add(argc, argv));
-    printf("execute end");
+        add(argc, argv);
     return 0;
 }
 
@@ -412,7 +409,6 @@ int main(int argc, char *argv[])
             break;
         else if (choice[1] == '+')
         {
-            printf("arg2 calle");
             n++;
             arg2(choice);
         }
@@ -422,8 +418,6 @@ int main(int argc, char *argv[])
                 arg1(choice[j]); 
         }
     }
-    printf("test1");
     execute(argc,argv);
-    printf("test2");
     return 0;
 }
