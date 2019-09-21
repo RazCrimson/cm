@@ -75,39 +75,3 @@ int absolute_path(char *file_path, char *full_path)
     }
 }
 
-int find_lines(char* options, int* line_start,int* line_end)
-{
-    int p=-1,l=0;
-    l=initialise();
-    if (options[0] == '-')
-    {
-        clear();
-        return 0;
-    }
-    else if (isdigit(options[0]))
-    {
-        for (i = 1; options[i] != '\0'; i++)
-        {
-            if (options[i] == '-')
-            {
-                if (p != -1)
-                    return -1;
-                p = i;
-            }
-            else if (!isdigit(options[i]))
-                return -1;
-        }
-    }
-    else
-        return -1;
-    *line_start = atoi(options);
-    if (*line_start <= 0 || *line_start > l)
-        return -1;
-    if (p != -1)
-    {
-        *line_end = atoi(&options[p + 1]);
-        if (*line_end < *line_start || line_end >= l)
-            return -1;
-    }
-    return 0;
-}
