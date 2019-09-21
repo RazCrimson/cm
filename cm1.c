@@ -14,11 +14,10 @@ FILE *fptr, *sptr, *dptr;
 
 int i, j, k, n = 1, l = 0, *count;
 char ***str;
-static bool function_mode = false; // False in function_mode indicates that the execution is for adding into clipboard
+enum mode {NONE,ADD,PASTE,MODIFY,REMOVE};
+enum mode CURRENT_RUN = NONE; // False in function_mode indicates that the execution is for adding into clipboard
 static bool move = false;          // False in copy_move is to sent copy and true for moving
-static bool mod_var = false;
 static bool list_var = false;
-static bool clr_var = false;
 static bool help_var = false;
 static bool rem_var = false;
 
@@ -38,7 +37,7 @@ int line()
     return count;
 }
 
-void initialise()
+int initialise()
 {
     l = line();
     count = (int *)calloc(l, sizeof(int));
@@ -67,17 +66,24 @@ void initialise()
             fscanf(fptr, "%s", &str[i][j][0]);
         }
     }
+    return l;
 }
 int arg1(char ch)
 {
     if (ch == 'm')
-        mod_var=true;
+    {
+        if(CURRENT_RUN==NONE)
+            CURRENT_RUN=MODIFY;
+        else
+        {
+            printf("\nPLease enter valid combination of options.");
+            exit(-1);
+        }
+    }
     else if(ch=='l')
         list_var=true;
     else if(ch=='h')
         help_var=true;
-    else if(ch=='c')
-        clr_var=true;
     else if(ch=='r')
         rem_var=true;
     else if(ch=='x')
@@ -89,11 +95,17 @@ int arg1(char ch)
 int arg2(const char *choice)
 {
     if(strcmp(choice[2],"modify")==0)
-        mod_var=true;
+    {
+        if(CURRENT_RUN==NONE)
+            CURRENT_RUN=MODIFY;
+        else
+        {
+            printf("\nPLease enter valid combination of options.");
+            exit(-1);
+        }
+    }
     else if(strcmp(choice[2],"list")==0)
         list_var=true;
-    else if(strcmp(choice[2],"clear")==0)
-        clr_var=true;
     else if(strcmp(choice[2],"help")==0)
         help_var=true;
     else if(strcmp(choice[2],"remove")==0)
@@ -104,7 +116,7 @@ int arg2(const char *choice)
     return 0;
 }
 
-int add(int argc, char *argv[], int n)
+int add(int argc, char *argv[])
 {
 
     char full_path[_PC_PATH_MAX];
@@ -116,9 +128,9 @@ int add(int argc, char *argv[], int n)
         exit(1);
     }
     if (move == true)
-        fprintf(fptr, "mv ");
+        fprintf(fptr, " mv ");
     else
-        fprintf(fptr, "cp ");
+        fprintf(fptr, " cp ");
     for (int i = n; i < argc; i++)
     {
         if (absolute_path(argv[i], full_path) == 0)
@@ -130,7 +142,7 @@ int add(int argc, char *argv[], int n)
     return 0;
 }
 
-int copy_file(char *source_path, char *dest_path)
+/*int copy_file(char *source_path, char *dest_path)
 {
     char *prevptr, *ptr = source_path, ch;
     sptr = fopen(source_path, "r");
@@ -160,131 +172,86 @@ re:
     if (move == true)
         remove(source_path);
     return 0;
-}
+}*/
 
-int paste(char *options, char *dest_main)
+int paste(int l1,int l2, char *dest_main)
 {
-    
-    int l1 = 0, l2 = 0, p = -1;
-    initialise();
-    if (options[0] == '-')
-    {
-        clear();
-        return 0;
-    }
-    else if (isdigit(options[0]))
-    {
-        for (i = 1; options[i] != '\0'; i++)
-        {
-            if (options[i] == '-')
-            {
-                if (p != -1)
-                    return -1;
-                p = i;
-            }
-            else if (!isdigit(options[i]))
-                return -1;
-        }
-    }
-    else
-        return -1;
-    l1 = atoi(options);
-    if (l1 <= 0 || l1 > l)
-        return -1;
-    if (p != -1)
-    {
-        l2 = atoi(&options[p + 1]);
-        if (l2 < l1 || l2 >= l)
-            return -1;
-    }
-    //////
-    char source_path[10000] = {'\0'};
+    char source_path[100000] = {""};
     char *dest_path = (char *)malloc(sizeof(char) * _PC_PATH_MAX);
     if (dest_main != NULL)
         dest_path = dest_main;
     else
         cwd_path(dest_path);
-
     fptr = fopen(myfile, "r+");
     if (fptr == NULL)
     {
         perror("Error!");
         exit(1);
     }
+    /*
     while (getc(fptr) != EOF)
     {
         fscanf(fptr, "%s", source_path); // Need a dynamic arry and string concate
         copy_file(source_path, dest_path);
     }
-    fclose(fptr);
+    fclose(fptr);*/
+    if(l1!=NULL)
+        while(--l1)
+        {
+            fscanf(fptr,"%[^\n]s ",source_path);
+            if(l2!=NULL)
+                l2--;
+            if(get(fptr)==EOF)
+            {
+                printf("ERROR the lines specified exccced the no. of entries");
+                exit(-1);
+            }
+
+        }
+    while (getc(fptr) != EOF)
+    {
+        fscanf(fptr, "%[^\n]s", source_path+3); // Need a dynamic arry and string concate
+        strcat(source_path,dest_path);
+        system(source_path);
+        if(l2!=NULL)
+        {
+            if(!(--l2))
+                break;
+
+        }
+    }
     return 0;
 }
 
 int clear()
 {
     remove(myfile);
-    fptr = fopen(myfile, "wb+");
+    fptr = fopen(myfile, "w+");
     fclose(fptr);
     return 0;
 }
-int list(char *options) //options can be a range or a single number
+int list()
 {
-
     char string[10000] = {'\0'};
     fptr = fopen(myfile, "r");
-    if (options == NULL)
-        for (int i = 1; getc(fptr) != EOF; i++)
-        {
-            fscanf(fptr, "%[^\n]s", string);
-            printf("%d. %s\n ", i, string);
-        }
+    for (int i = 1; getc(fptr) != EOF; i++)
+    {
+        fscanf(fptr, "%[^\n]s", string);
+        printf("%d. %s\n ", i, string);
+    }
     fclose(fptr);
     return 0;
 }
 
-int remove_line(char *options) //options can be a range or a single number
+int remove_line(int l1,int l2)
 {
-    int l1 = 0, l2 = 0, p = -1, len = 0, start = 0;
-    initialise();
-    if (options[0] == '-')
+    int len = 0, start = 0;
+    if(l1==NULL&&l2==NULL)
     {
-        clear();
+        remove(myfile);
+        fptr = fopen(myfile, "w+");
+        fclose(fptr);
         return 0;
-    }
-    else if (isdigit(options[0]))
-    {
-        for (i = 1; options[i] != '\0'; i++)
-        {
-            if (options[i] == '-')
-            {
-                if (p != -1)
-                    return -1;
-                p = i;
-            }
-            else if (!isdigit(options[i]))
-                return -1;
-        }
-    }
-    else
-        return -1;
-    /*for(i=1;i<p;i++)
-    {
-        if (!isdigit(options[i]))
-            return -1;
-    }
-    for(i=p+1;options[i]!='\0';i++)
-    {
-        if (!isdigit(options[i]))
-            return -1;
-    }*/
-    l1 = atoi(options);
-    if (l1 <= 0 || l1 > l)
-        return -1;
-    if (p != -1)
-    {
-        l2 = atoi(&options[p + 1]);
-        if (l2 < l1 || l2 >= l)
-            return -1;
     }
     if (l2 == 0)
     {
@@ -332,7 +299,7 @@ int remove_line(char *options) //options can be a range or a single number
     return 0;
 }
 
-int modify(int argc, char *argv[], int n, int opt1, int opt2) //options can be a range or a single number
+int modify(int argc, char *argv[], int opt1, int opt2) //options can be a range or a single number
 {
 
     if (opt2 == -1) // clearing all the lines and replacing them
@@ -377,8 +344,10 @@ void help()
     printf("++clear or +c to clear contents copied files\n");
 }
 
-int execute() //All the execution of the functions r gonna be made here
+int execute(int argc, char *argv[]) //All the execution of the functions r gonna be made here
 {
+    if(CURRENT_RUN==ADD)
+        add(argc, &argv);
     return 0;
 }
 
@@ -405,6 +374,6 @@ int main(int argc, char *argv[])
                 arg1(choice[j]); 
         }
     }
-    execute();
+    execute(argc,&argv);
     return 0;
 }
