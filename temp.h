@@ -65,8 +65,7 @@ int cwd_path(char *cwd)
 
 int absolute_path(char *file_path, char *full_path)
 {
-    char *path = (char *)malloc(sizeof(char) * _PC_PATH_MAX);
-    if (realpath(path, full_path) != NULL)
+    if (realpath(file_path, full_path) != NULL)
         return 0;
     else
     {

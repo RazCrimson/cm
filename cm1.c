@@ -28,10 +28,7 @@ int find_lines(char* options, int* line_start,int* line_end)
     int p=-1,l=0;
     l=initialise();
     if (options[0] == '-')
-    {
-        clear();
-        return 0;
-    }
+        return -2;                      // -2 inc
     else if (isdigit(options[0]))
     {
         for (i = 1; options[i] != '\0'; i++)
@@ -54,7 +51,7 @@ int find_lines(char* options, int* line_start,int* line_end)
     if (p != -1)
     {
         *line_end = atoi(&options[p + 1]);
-        if (*line_end < *line_start || line_end >= l)
+        if (*line_end < *line_start || *line_end >= l)
             return -1;
     }
     return 0;
@@ -142,6 +139,16 @@ int arg2(const char *choice)
             exit(-1);
         }
     }
+    else if(strcmp(&choice[2],"add")==0)
+    {
+        if(CURRENT_RUN==NONE)
+            CURRENT_RUN=ADD;
+        else
+        {
+            printf("\nPLease enter valid combination of options.");
+            exit(-1);
+        }
+    }
     else if(strcmp(&choice[2],"list")==0)
         list_var=true;
     else if(strcmp(&choice[2],"help")==0)
@@ -156,7 +163,7 @@ int arg2(const char *choice)
 
 int add(int argc, char *argv[])
 {
-
+    printf("ADD Executerd");
     char full_path[_PC_PATH_MAX];
     fptr = fopen(myfile, "w+");
     fseek(fptr, 0, SEEK_END);
@@ -385,7 +392,8 @@ void help()
 int execute(int argc, char *argv[]) //All the execution of the functions r gonna be made here
 {
     if(CURRENT_RUN==ADD)
-        add(argc, argv);
+        printf("add return %d",add(argc, argv));
+    printf("execute end");
     return 0;
 }
 
@@ -397,13 +405,15 @@ int main(int argc, char *argv[])
         return 0;
     }
     char choice[20];
-    for (int i = 1; i < argc; i++)
+    for (i = 1; i < argc; i++)
     {
         strcpy(choice, argv[i]);
         if (choice[0] != '+')
             break;
         else if (choice[1] == '+')
         {
+            printf("arg2 calle");
+            n++;
             arg2(choice);
         }
         else
@@ -412,6 +422,8 @@ int main(int argc, char *argv[])
                 arg1(choice[j]); 
         }
     }
+    printf("test1");
     execute(argc,argv);
+    printf("test2");
     return 0;
 }
