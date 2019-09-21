@@ -8,22 +8,34 @@
 #include <ctype.h>
 #include "temp.h"
 
+int find_lines(char *);
+int line();
 int initialise();
+int arg1(char);
+int arg2(const char *,char **);
+int add(int,char **);
+int paste();
+int clear();
+int list();
+int remove_line();
+int modify(int,char **);
+void help();
+int execute(int,char **);
 
-const char myfile[] = "clipboard_path_added_by_bash_script";
+const char myfile[] = "/home/sheerabth/Documents/git/cm/clipboard_path_added_by_bash_script";
 
-FILE *fptr, *sptr, *dptr;
+FILE *fptr;
+//FILE *fptr,*sptr, *dptr;
 
-int i, j, k, n = 1, l = 0, *count;
+int i, j, k, n = 1, l = 0,line_start=0,line_end=0, *count;
 char ***str;
 enum mode {NONE,ADD,PASTE,MODIFY,REMOVE};
 enum mode CURRENT_RUN = NONE; // False in function_mode indicates that the execution is for adding into clipboard
 static bool move = false;          // False in copy_move is to sent copy and true for moving
-static bool list_var = false;
-static bool help_var = false;
-static bool rem_var = false;
 
-int find_lines(char* options, int* line_start,int* line_end)
+
+
+int find_lines(char *options)
 {
     int p=-1,l=0;
     l=initialise();
@@ -45,26 +57,26 @@ int find_lines(char* options, int* line_start,int* line_end)
     }
     else
         return -1;
-    *line_start = atoi(options);
-    if (*line_start <= 0 || *line_start > l)
+    line_start = atoi(options);
+    if (line_start <= 0 || line_start > l)
         return -1;
     if (p != -1)
     {
-        *line_end = atoi(&options[p + 1]);
-        if (*line_end < *line_start || *line_end >= l)
+        line_end = atoi(&options[p + 1]);
+        if (line_end < line_start || line_end >= l)
             return -1;
     }
     return 0;
 }
 int line()
 {
-    int count;
+    int count=0;
     char ch;
 
     fptr = fopen(myfile, "r");
-    while (getc(fptr) != EOF)
+    while (fgetc(fptr) != EOF)
     {
-        fscanf(fptr, "%c", &ch);
+        ch=fgetc(fptr);
         if (ch == '\n')
             count++;
     }
@@ -104,67 +116,90 @@ int initialise()
     return l;
 }
 int arg1(char ch)
-{
-    if (ch == 'm')
+{   
+    switch(ch)
     {
-        if(CURRENT_RUN==NONE)
-            CURRENT_RUN=MODIFY;
-        else
-        {
-            printf("\nPLease enter valid combination of options.");
-            exit(-1);
-        }
+        case 'm':
+            {
+                if(CURRENT_RUN==NONE)
+                    CURRENT_RUN=MODIFY;
+                else
+                    errors(-10);
+                break;
+            }
+        case 'a':
+            {
+                if(CURRENT_RUN==NONE)
+                    CURRENT_RUN=ADD;
+                else
+                    errors(-10);
+                break;
+            }
+        case 'p':
+            {
+                if(CURRENT_RUN==NONE)
+                    CURRENT_RUN=PASTE;
+                else
+                    errors(-10);
+                break;
+            }
+        case 'r':
+            {
+                if(CURRENT_RUN==NONE)
+                    CURRENT_RUN=REMOVE;
+                else
+                    errors(-10);
+                break;   
+            }
+        case 'l': list(); break;
+        case 'h': help(); break;
+        case 'x': move=true; break;
+        default:
+            errors(-11);
     }
-    else if(ch=='l')
-        list_var=true;
-    else if(ch=='h')
-        help_var=true;
-    else if(ch=='r')
-        rem_var=true;
-    else if(ch=='x')
-        move=true;
-    
     return 0;
 }
 
-int arg2(const char *choice)
+int arg2(const char *choice,char *argv[])
 {
     if(strcmp(&choice[2],"modify")==0)
     {
         if(CURRENT_RUN==NONE)
             CURRENT_RUN=MODIFY;
         else
-        {
-            printf("\nPLease enter valid combination of options.");
-            exit(-1);
-        }
+            errors(-10);
     }
     else if(strcmp(&choice[2],"add")==0)
     {
         if(CURRENT_RUN==NONE)
             CURRENT_RUN=ADD;
         else
-        {
-            printf("\nPLease enter valid combination of options.");
-            exit(-1);
-        }
+            errors(-10);
     }
     else if(strcmp(&choice[2],"list")==0)
-        list_var=true;
+        list();
     else if(strcmp(&choice[2],"help")==0)
-        help_var=true;
+        help();
     else if(strcmp(&choice[2],"remove")==0)
-        rem_var=true;
+    {
+        if(CURRENT_RUN==NONE)
+            CURRENT_RUN=REMOVE;
+        else
+            errors(-10);
+    }
     else if(strcmp(&choice[2],"move")==0)
         move=true;
-    
+    else if(strcmp(&choice[2],"range")==0)
+        find_lines(&argv[n][0]);
+    else 
+        errors(-11);
     return 0;
 }
 
 int add(int argc, char *argv[])
 {
     char full_path[10000];
-    fptr = fopen(myfile, "w+");
+    fptr = fopen(myfile, "a+");
     fseek(fptr, 0, SEEK_END);
     if (fptr == NULL)
     {
@@ -185,7 +220,7 @@ int add(int argc, char *argv[])
     return 0;
 }
 
-/*int copy_file(char *source_path, char *dest_path)
+/*int copy_file(char *source_path, char *dest_pelse if(strcmp(&choice[2],"add")==0)ath)
 {
     char *prevptr, *ptr = source_path, ch;
     sptr = fopen(source_path, "r");
@@ -217,14 +252,11 @@ re:
     return 0;
 }*/
 
-int paste(int l1,int l2, char *dest_main)
+int paste()
 {
     char source_path[100000] = {""};
-    char *dest_path = (char *)malloc(sizeof(char) * _PC_PATH_MAX);
-    if (dest_main != NULL)
-        dest_path = dest_main;
-    else
-        cwd_path(dest_path);
+    char *dest_path = (char *)malloc(sizeof(char) * 100000);
+    cwd_path(dest_path);
     fptr = fopen(myfile, "r+");
     if (fptr == NULL)
     {
@@ -238,30 +270,27 @@ int paste(int l1,int l2, char *dest_main)
         copy_file(source_path, dest_path);
     }
     fclose(fptr);*/
-    if(l1!=0)
-        while(--l1)
+    if(line_start>0)
+    {
+        while(--line_start)
         {
             fscanf(fptr,"%[^\n]s ",source_path);
-            if(l2!=0)
-                l2--;
+            if(line_end>0)
+                line_end--;
             if(getc(fptr)==EOF)
             {
                 printf("ERROR the lines specified exccced the no. of entries");
                 exit(-1);
             }
-
         }
+    }if (line_end == NULL)
     while (getc(fptr) != EOF)
     {
         fscanf(fptr, "%[^\n]s", source_path+3); // Need a dynamic arry and string concate
         strcat(source_path,dest_path);
         system(source_path);
-        if(l2!=0)
-        {
-            if(!(--l2))
-                break;
-
-        }
+        if(!(line_end--))
+            break;
     }
     return 0;
 }
@@ -286,25 +315,25 @@ int list()
     return 0;
 }
 
-int remove_line(int l1,int l2)
+int remove_line()
 {
     int len = 0, start = 0;
-    if(l1==NULL&&l2==NULL)
+    if(line_start==NULL&&line_end==NULL)
     {
         remove(myfile);
         fptr = fopen(myfile, "w+");
         fclose(fptr);
         return 0;
     }
-    if (l2 == NULL)
+    if (line_end == NULL)
     {
         len = 1;
-        start = l1;
+        start = line_start;
     }
     else
     {
-        len = l2 - l1 + 1;
-        start = l2;
+        len = line_end - line_start + 1;
+        start = line_end;
     }
     for (i = start; i < l; i++)
     {
@@ -342,23 +371,23 @@ int remove_line(int l1,int l2)
     return 0;
 }
 
-int modify(int argc, char *argv[], int opt1, int opt2) //options can be a range or a single number
+int modify(int argc, char *argv[]) //options can be a range or a single number
 {
 
-    if (opt2 == -1) // clearing all the lines and replacing them
+    if (line_end == -1) // clearing all the lines and replacing them
     {
         int temp = argc - n;
-        str[opt1 - 1] = (char **)realloc(str + opt1 - 1, sizeof(char) * temp); //free other memory spaces
+        str[line_start - 1] = (char **)realloc(str + line_start - 1, sizeof(char) * temp); //free other memory spaces
 
-        memset(str + opt1 - 1, '\0', temp * PATH_MAX * sizeof(char));
+        memset(str + line_start - 1, '\0', temp * PATH_MAX * sizeof(char));
         for (i = 0; i < temp; i++)
-            strcpy(&str[opt1 - 1][i][0], argv[i + n]);
-        count[opt1 - 1] = temp;
+            strcpy(&str[line_start - 1][i][0], argv[i + n]);
+        count[line_start - 1] = temp;
     }
     else
     {
-        memset(&str[opt1 - 1][opt2 - 1], '\0', PATH_MAX * sizeof(char));
-        strcpy(&str[opt1 - 1][opt2 - 1][0], argv[i + n]);
+        memset(&str[line_start - 1][line_end - 1], '\0', PATH_MAX * sizeof(char));
+        strcpy(&str[line_start - 1][line_end - 1][0], argv[i + n]);
     }
     clear();
     for (i = 0; i < l; i++)
@@ -391,11 +420,17 @@ int execute(int argc, char *argv[]) //All the execution of the functions r gonna
 {
     if(CURRENT_RUN==ADD)
         add(argc, argv);
+    else if(CURRENT_RUN==PASTE)
+        paste();
+    else if(CURRENT_RUN==REMOVE)
+        remove_line();
+    
     return 0;
 }
 
 int main(int argc, char *argv[])
 {
+
     if (argc <= 1)
     {
         printf("\n%s requires at least one argument.\nPlease try %s ++help for more information.\n", argv[0], argv[0]);
@@ -410,10 +445,11 @@ int main(int argc, char *argv[])
         else if (choice[1] == '+')
         {
             n++;
-            arg2(choice);
+            arg2(choice,argv);
         }
         else
         {
+            n++;
             for (j = 1; choice[j] != '\0'; j++)
                 arg1(choice[j]); 
         }

@@ -74,3 +74,14 @@ int absolute_path(char *file_path, char *full_path)
     }
 }
 
+int errors(int err)
+{
+    switch(err)
+    {
+        case -10:  printf("\nError Code : %d\nPlease enter valid combination of options.",err);   exit(err);
+        case -11:  printf("\nError Code : %d\nPlease enter valid options.",err);   exit(err);
+
+    }
+    return 0;
+}
+

@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": ["++add","temp.h"],
+            "args": ["++remove","++range","2"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
