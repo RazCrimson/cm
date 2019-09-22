@@ -85,7 +85,36 @@ int errors(int err)
     return 0;
 }
 
-int remove_line2()         
+int modify(char *line_to_add)         
 {
-    
+    char ch,flg=0;
+    int Current_line=1;
+    FILE *sptr,*dptr;
+    sptr = fopen(myfile, "r");
+    dptr = fopen(myfilenew, "w");
+
+    ch = getc(sptr);
+    if(line_start==0)
+        return -1;
+        
+    while (ch != EOF)
+    {
+        if (ch == '\n')
+            Current_line++;
+
+        if (Current_line != line_start)
+            putc(ch, dptr);
+        else if(Current_line==line_start)
+        {
+            if(flg==0)
+                fprintf(dptr,"\n%s",line_to_add);
+            flg=1;
+        }            
+        ch = getc(sptr);
+    }
+    fclose(sptr);
+    fclose(dptr);
+    remove(myfile);
+    rename(myfilenew,myfile);
+    return 0;
 }
