@@ -18,7 +18,7 @@ int paste();
 int clear();
 int list();
 int remove_line();
-int modify(int,char **);
+int modify(char *);
 void help();
 int execute(int,char **);
 
@@ -410,38 +410,37 @@ int remove_line()
     return 0;
 }
 
-int modify(int argc, char *argv[]) //options can be a range or a single number
+int modify(char *line_to_add)         
 {
+    char ch,flg=0;
+    int Current_line=1;
+    FILE *sptr,*dptr;
+    sptr = fopen(myfile, "r");
+    dptr = fopen(myfilenew, "w");
 
-    if (line_end == -1) // clearing all the lines and replacing them
+    ch = getc(sptr);
+    if(line_start==0)
+        return -1;
+        
+    while (ch != EOF)
     {
-        int temp = argc - n;
-        str[line_start - 1] = (char **)realloc(str + line_start - 1, sizeof(char) * temp); //free other memory spaces
+        if (ch == '\n')
+            Current_line++;
 
-        memset(str + line_start - 1, '\0', temp * PATH_MAX * sizeof(char));
-        for (i = 0; i < temp; i++)
-            strcpy(&str[line_start - 1][i][0], argv[i + n]);
-        count[line_start - 1] = temp;
-    }
-    else
-    {
-        memset(&str[line_start - 1][line_end - 1], '\0', PATH_MAX * sizeof(char));
-        strcpy(&str[line_start - 1][line_end - 1][0], argv[i + n]);
-    }
-    clear();
-    for (i = 0; i < l; i++)
-    {
-        for (j = 0; j < count[i]; j++)
+        if (Current_line != line_start)
+            putc(ch, dptr);
+        else if(Current_line==line_start)
         {
-            for (k = 0; str[i][j][k] != '\0'; k++)
-            {
-                fprintf(fptr, "%c", str[i][j][k]);
-            }
-            fprintf(fptr, " ");
-        }
-        fprintf(fptr, "\n");
+            if(flg==0)
+                fprintf(dptr,"\n%s",line_to_add);
+            flg=1;
+        }            
+        ch = getc(sptr);
     }
-    fclose(fptr);
+    fclose(sptr);
+    fclose(dptr);
+    remove(myfile);
+    rename(myfilenew,myfile);
     return 0;
 }
 
