@@ -22,7 +22,8 @@ int modify(int,char **);
 void help();
 int execute(int,char **);
 
-const char myfile[] = "/home/sheerabth/Documents/git/cm/clipboard_path_added_by_bash_script";
+const char myfile[] = "/root/Desktop/cm/clipboard";
+const char myfilenew[] = "/root/Desktop/cm/clipboard.new";
 
 FILE *fptr;
 //FILE *fptr,*sptr, *dptr;
