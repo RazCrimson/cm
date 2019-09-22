@@ -38,10 +38,9 @@ static bool move = false;          // False in copy_move is to sent copy and tru
 
 int find_lines(char *options)
 {
-    int p=-1,l=0;
-    l=initialise();
+    int p=-1,l=line();
     if (options[0] == '-')
-        return -2;                      // -2 inc
+        return -2;                      
     else if (isdigit(options[0]))
     {
         for (i = 1; options[i] != '\0'; i++)
@@ -69,18 +68,19 @@ int find_lines(char *options)
     }
     return 0;
 }
+
 int line()
 {
     int count=0;
     char ch;
 
     fptr = fopen(myfile, "r");
-    while (fgetc(fptr) != EOF)
+    ch = getc(fptr);
+    while (ch!= EOF)
     {
-        fseek(fptr,-1,SEEK_CUR);
-        ch=fgetc(fptr);
         if (ch == '\n')
             count++;
+        ch=getc(fptr);       
     }
     fclose(fptr);
     return count;
@@ -236,7 +236,28 @@ int arg2(const char *choice,char *argv[])
     else if(strcmp(&choice[2],"move")==0)
         move=true;
     else if(strcmp(&choice[2],"range")==0)
-        find_lines(&argv[n][0]);
+    {
+        int result=find_lines(&argv[n][0]);
+        if(result==0);
+        else if(result==-1)
+        {
+            printf("\nPlease enter a valid range!!\nThe Current List contains: ");
+            list();
+            exit(-1);
+        }
+        else if(result==-2)
+        {
+            printf("\nPlease enter a initial value for range!!\nThe Current List contains: ");
+            list();
+            exit(-1);
+        }
+        else
+        {
+            /* code */
+        }
+        
+
+    }
     else 
         errors(-11);
     return 0;
@@ -309,13 +330,7 @@ int paste()
         perror("Error!");
         exit(1);
     }
-    /*
-    while (fgetc(fptr) != EOF)
-    {
-        fscanf(fptr, "%s", source_path); // Need a dynamic arry and string concate
-        copy_file(source_path, dest_path);
-    }
-    fclose(fptr);*/
+       
     if(line_start>0)
     {
         while(--line_start)
@@ -329,14 +344,17 @@ int paste()
                 exit(-1);
             }
         }
-    }if (line_end == NULL)
-    while (fgetc(fptr) != EOF)
+    }
+    if (line_end == NULL)
     {
-        fscanf(fptr, "%[^\n]s", source_path+3); // Need a dynamic arry and string concate
-        strcat(source_path,dest_path);
-        system(source_path);
-        if(!(line_end--))
-            break;
+        while (fgetc(fptr) != EOF)
+        {
+            fscanf(fptr, "%[^\n]s", source_path+3); // Need a dynamic arry and string concate
+            strcat(source_path,dest_path);
+            system(source_path);
+            if(!(line_end--))
+                break;
+        }
     }
     return 0;
 }
@@ -363,57 +381,32 @@ int list()
 
 int remove_line()
 {
-    int len = 0, start = 0;
-    if(line_start==NULL&&line_end==NULL)
+    char ch;
+    int Current_line=1;
+    FILE *sptr,*dptr;
+    sptr = fopen(myfile, "r");
+    dptr = fopen(myfilenew, "w");
+
+    ch = getc(sptr);
+    if(line_start==0)
+        return -1;
+    if(line_end==0)
+        line_end=line_start;
+        
+    while (ch != EOF)
     {
-        remove(myfile);
-        fptr = fopen(myfile, "w+");
-        fclose(fptr);
-        return 0;
+        if (ch == '\n')
+            Current_line++;
+
+        if ((Current_line < line_start)||(Current_line> line_end))
+            putc(ch, dptr);
+        
+        ch = getc(sptr);
     }
-    if (line_end == NULL)
-    {
-        len = 1;
-        start = line_start;
-    }
-    else
-    {
-        len = line_end - line_start + 1;
-        start = line_end;
-    }
-    for (i = start; i < l; i++)
-    {
-        str[i - len] = (char **)realloc(&str[i - len], count[i] * sizeof(char));
-        for (int j = 0; j < count[i]; j++)
-        {
-            str[i - len][j] = (char *)realloc(&str[i - len][j][0], PATH_MAX * sizeof(char));
-            memset(&str[i][j][0], '\0', PATH_MAX * sizeof(char));
-        }
-        //memset(str + i - len, '\0', count[i] * PATH_MAX * sizeof(char));
-        for (j = 0; j < count[i]; j++)
-        {
-            for (k = 0; k < PATH_MAX; k++)
-            {
-                str[i - len][j][k] = str[i][j][k];
-            }
-        }
-    }
-    for (i = start; i < l; i++)
-    {
-        count[i - len] = count[i];
-    }
-    l = l - len;
-    clear();
-    for (i = 0; i < l; i++)
-    {
-        for (j = 0; j < count[i]; j++)
-        {
-            fprintf(fptr, "%s", &str[i][j][0]);
-            fprintf(fptr, " ");
-        }
-        fprintf(fptr, "\n");
-    }
-    fclose(fptr);
+    fclose(sptr);
+    fclose(dptr);
+    remove(myfile);
+    rename(myfilenew,myfile);
     return 0;
 }
 
@@ -470,7 +463,6 @@ int execute(int argc, char *argv[]) //All the execution of the functions r gonna
         paste();
     else if(CURRENT_RUN==REMOVE)
         remove_line();
-    
     return 0;
 }
 
