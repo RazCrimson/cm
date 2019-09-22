@@ -3,6 +3,6 @@ PATH=$PATH:$PWD/cm
 path=$PWD/clipboard
 rm path; touch path
 file=cm.c
-sed -i 's|clipboard_path_added_by_bash_script|'$path'|g' $file > output.c 
+sed -i 's|clipboard_path_added_by_setup.sh|'$path'|g' $file > output.c 
 gcc -O output.c -o cm
 rm -f output.c
