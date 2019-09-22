@@ -76,6 +76,7 @@ int line()
     fptr = fopen(myfile, "r");
     while (fgetc(fptr) != EOF)
     {
+        fseek(fptr,-1,SEEK_CUR);
         ch=fgetc(fptr);
         if (ch == '\n')
             count++;
@@ -86,7 +87,7 @@ int line()
 
 int initialise()
 {
-    int l,*count;
+    int length,l,*count;
     char ***str;
     l = line();
     count = (int *)calloc(l, sizeof(int));
@@ -94,30 +95,69 @@ int initialise()
     fptr = fopen(myfile, "r+");
     for (i = 0; i < l; i++)
     {
-
-        while (!feof(fptr))
+       // printf("i=%d\n",i); //trial
+        while (fgetc(fptr)!='\n')
         {
+          //  printf("i=%d\n",i);
+            fseek(fptr,-1,SEEK_CUR);
             if (fgetc(fptr) == ' ')
             {
-                count[i]++;
+                ++count[i];
+                
             }
         }
+        ++count[i];
+        //printf("count[%d]=%d\n",i,t);
     }
+    fclose(fptr);
     for (i = 0; i < l; i++)
     {
+        //printf("i=%d\n",i);
         str[i] = (char **)calloc(count[i], sizeof(char));
         for (j = 0; j < count[i]; j++)
         {
+            //printf("j=%d\n",j);
             str[i][j] = (char *)calloc(PATH_MAX, sizeof(char));
         }
     }
-    for (i = 0; fgetc(fptr) != EOF; i++)
+    
+/*    for(i=0;i<l;i++)
     {
-        for (j = 0; fgetc(fptr) != '\n'; j++)
+        for(j=0;j<count[i];j++)
         {
-            fscanf(fptr, "%s", &str[i][j][0]);
+            for(k=0;k<PATH_MAX;k++)
+            {
+                if(str[i][j][k]=='\0')
+                printf("0");
+            }
+            printf("\t");
+        }
+        printf("\n");
+    }*/
+    fptr = fopen(myfile, "r+");
+    for (i = 0; i<l; i++)
+    {
+        //printf("i=%d\n",i);
+        for (j = 0;j<count[i]; j++)
+        {
+            for(k=0;fgetc(fptr)!=' '&&(fseek(fptr,-1,SEEK_CUR),fgetc(fptr)!='\n');k++)
+            {
+                //printf("k=%d\n",k);
+                fseek(fptr,-1,SEEK_CUR);
+                str[i][j][k]=fgetc(fptr);
+
+            }
+            str[i][j][k]='\0';
         }
     }
+/*    for(i=0;i<l;i++)
+    {
+        for(j=0;j<count[i];j++)
+        {
+            printf("%s\t",str[i][j]);
+        }
+        printf("\n");
+    }*/
     return l;
 }
 int arg1(char ch)
@@ -203,7 +243,7 @@ int arg2(const char *choice,char *argv[])
 
 int add(int argc, char *argv[])
 {
-    char full_path[10000];
+    char full_path[10000];//PATH_MAX
     fptr = fopen(myfile, "a+");
     fseek(fptr, 0, SEEK_END);
     if (fptr == NULL)
