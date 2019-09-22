@@ -20,8 +20,8 @@ int modify(char *);
 void help();
 int execute(int, char **);
 
-const char myfile[] = "/root/Desktop/cm/clipboard";
-const char myfilenew[] = "/root/Desktop/cm/clipboard.new";
+const char myfile[] = "clipboard_path_added_by_setup.sh";
+const char myfilenew[] = "clipboard_path_added_by_setup.sh.new";
 
 FILE *sptr, *dptr;
 
@@ -35,9 +35,11 @@ enum mode
     MODIFY,
     REMOVE
 };
+
 enum mode CURRENT_RUN = NONE; // False in function_mode indicates that the execution is for adding into clipboard
 static bool Move = false;     // False in copy_move is to sent copy and true for moving
 static bool Error_mode = false;
+
 int cwd_path(char *cwd)
 {
     if (getcwd(cwd, 10000) != NULL)
@@ -87,7 +89,7 @@ int errors(int err)
             printf("Please enter a range!!, Your input contains a non-digit value in the range.\n");
             break;
         case 53:
-            printf("Please enter a valid range!!, Your input contains more than one '-'.\nPlease use one one '-' to specify the range.\n");
+            printf("Please enter a valid range!!, Your input contains more than one '-'.\nPlease use one '-' to specify the range.\n");
             break;
         //case 99: reserverd for cwd_path
         case 100:
