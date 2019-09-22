@@ -87,26 +87,5 @@ int errors(int err)
 
 int remove_line2()         
 {
-    char ch;
-    int Current_line=1;
-    FILE *sptr,*dptr;
-    sptr = fopen(myfile, "r");
-    dptr = fopen(myfilenew, "w");
-
-    ch = getc(sptr);
-    while (ch != EOF)
-    {
-        if (ch == '\n')
-            Current_line++;
-
-        if ((Current_line < line_start)||(Current_line> line_end))
-            putc(ch, dptr);
-        
-        ch = getc(sptr);
-    }
-    fclose(sptr);
-    fclose(dptr);
-    remove(myfile);
-    rename(myfilenew,myfile);
-    return 0;
+    
 }
