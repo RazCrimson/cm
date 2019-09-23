@@ -21,7 +21,7 @@ void help();
 int execute(int, char **);
 
 const char myfile[] = "clipboard_path_added_by_setup.sh";
-const char myfilenew[] = "clipboard_path_added_by_setup.sh.new";
+const char myfilenew[] = "clipboard_path_added_by_setup.sh";
 
 FILE *sptr, *dptr;
 
@@ -73,10 +73,10 @@ int errors(int err) // This Function is used to display errors and terminate the
         printf("The additonal arguments are not evaluated.\nPlease use the options ++help or +h\n");
         break;
     case -10:
-        printf("Please enter valid combination of options.\n", err);
+        printf("Please enter valid combination of options.\n");
         break;
     case -11:
-        printf("Please enter valid options.\n", err);
+        printf("Please enter valid options.\n");
         break;
     case 50:
         printf("Please enter the starting index of the range!!\nThe Current List contains: ");
@@ -434,12 +434,39 @@ int modify(int argc, char *argv[])  // Used to modify specific lines in the clip
 
 void help()
 {
-    printf("++add or +a to add file\n");
-    printf("++paste or +p to paste file\n");
-    printf("++list or +l to list all the copied files\n");
-    printf("++modify to modify the copied files\n");
-    printf("++remove or +r to remove the copied files\n");
-    printf("++clear or +c to clear contents copied files\n");
+    system("clear");
+    printf("\n\n\t#### AVAILABLE COMMANDS ##### \n\n\n");
+    printf("\t1.To add file to the clipboard\n");
+    printf("\t\t+a\n\t\t++add\n\n");
+    printf("\t  The format is:\n");
+    printf("\t  ++add [file 1] [file 2] ...\n\n");
+    printf("\t2.To paste copied files to the clipboard\n");
+    printf("\t\t+p\n\t\t++paste\n\n");
+    printf("\t  The format is:\n");
+    printf("\t  ++paste -> Will paste all the files copied in the clipboard into the current directory\n\n");
+    printf("\t  ++paste ++range [line number]");
+    printf(" -> Will paste the file in the given line number's respective file in the current directory\n\n");
+    printf("\t  ++paste ++range [line number 1]-[line number 2]");
+    printf(" -> Will paste the files in the respective range of lines in the current directory\n\n");
+    printf("\t3.To list all the files copied\n");
+    printf("\t\t+l\n\t\t++list\n\n");
+    printf("\t4.To modify the copied files\n");
+    printf("\t\t++modify\n\n");
+    printf("\t  The format is:\n");
+    printf("\t  ++modify ++range [line number] [new file 1] [new file 2] ...\n\n\t");
+    printf(" -> Will remove the file copied in the line number and replace it with the new files\n\n");
+    printf("\t  ++modify ++range [line number 1]-[line number 2] [new file 1] [new file 2] ...\n\n\t");
+    printf(" -> Will remove the files copied in the respective reange of lines and replace it with the new files\n\n");
+    printf("\t5.To remove the files copied\n");
+    printf("\t\t+r\n\t\t++remove\n\n");
+    printf("\t  The format is:\n");
+    printf("\t  ++remove -> Will remove all the files copied in the clipboard\n\n");
+    printf("\t  ++remove ++range [line number]");
+    printf(" -> Will remove the file in the given line number from the clipboard\n\n");
+    printf("\t  ++remove ++range [line number 1]-[line number 2]\n\n\t");
+    printf(" -> Will remove the files in the respective range of lines copied in the clipboard\n\n");
+    printf("\t6.For trouble shooting\n");
+    printf("\t\t+e\n\t\t++error\n\n");
 }
 
 int execute(int argc, char *argv[]) // Used to execute the functions as requested by the options
