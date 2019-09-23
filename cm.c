@@ -20,8 +20,8 @@ int modify(int, char **);
 void help();
 int execute(int, char **);
 
-const char myfile[] = "clipboard_path_added_by_setup.sh";
-const char myfilenew[] = "clipboard_path_added_by_setup.sh.new";
+const char myfile[] = "/root/Desktop/cm/.clipboard";
+const char myfilenew[] = "/root/Desktop/cm/.clipboard.new";
 
 FILE *sptr, *dptr;
 
@@ -144,7 +144,6 @@ int find_lines(char *options)   // Used to parse the argument provided as a stri
         if (line_end < line_start || line_end >= len)
             errors(51);
     }
-    n++;
     return 0;
 }
 
@@ -253,9 +252,16 @@ int arg2(const char *choice, char *argv[])  // Used to set global variables acco
         Error_mode = true;
     else if (strcmp(&choice[2], "range") == 0)
     {
-        int result = find_lines(&argv[n][0]);
+        int result = find_lines(&argv[++n][0]);
         if (result != 0)
             errors(0);
+    }
+    else if (strcmp(&choice[2], "paste") == 0)
+    {
+        if (CURRENT_RUN == NONE)
+            CURRENT_RUN = PASTE;
+        else
+            errors(-10);
     }
     else
         errors(-11);
@@ -264,7 +270,7 @@ int arg2(const char *choice, char *argv[])  // Used to set global variables acco
 
 int add(int argc, char *argv[]) // Used to add the files' absolute path to the clipboard
 {
-    char full_path[10000], flg = 0;
+    char full_path[10000], flg = 0;                
     if (n == argc)
         errors(1001);
     sptr = fopen(myfile, "a+");
@@ -283,7 +289,7 @@ int add(int argc, char *argv[]) // Used to add the files' absolute path to the c
             flg = 1;
         }
 
-        if (absolute_path(1, argv[i], full_path) == 0)
+        if (absolute_path(1, argv[i],full_path) == 0)
             fprintf(sptr, "%s ", full_path);
     }
     fprintf(sptr, "%c", '\n');
@@ -394,6 +400,8 @@ int modify(int argc, char *argv[])  // Used to modify specific lines in the clip
     ch = getc(sptr);
     if (line_start == 0)
         errors(201);
+    if(line_end==0)
+        line_end=line_start;
 
     while (ch != EOF)
     {
@@ -471,19 +479,17 @@ int main(int argc, char *argv[])    // The Main function with command line argum
         return 0;
     }
     char choice[20];
-    for (i = 1; i < argc; i++)  // Loop to parse for the options in the command line arguments
+    for (n = 1; n < argc; n++)  // Loop to parse for the options in the command line arguments
     {
-        strcpy(choice, argv[i]);
+        strcpy(choice, argv[n]);
         if (choice[0] != '+')
             break;
         else if (choice[1] == '+')
         {
-            n++;
             arg2(choice, argv);
         }
         else
         {
-            n++;
             for (j = 1; choice[j] != '\0'; j++)
                 arg1(choice[j]);
         }
