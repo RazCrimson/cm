@@ -1,11 +1,11 @@
 
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <ctype.h>
+#include <string.h>     // For strlen, strcpy and strcat functions
+#include <stdlib.h>     // For exit(), system(), atoi(), rename() and remove() functions
+#include <limits.h>     // For PATH_MAX
+#include <stdbool.h>    // For bool datatypes
+#include <unistd.h>     // For getcwd() and realpath() functions
+#include <ctype.h>      // For isdigit() function
 
 int find_lines(char *);
 int line();
@@ -16,12 +16,12 @@ int paste();
 int clear();
 int list();
 int remove_line();
-int modify(int ,char **);
+int modify(int, char **);
 void help();
 int execute(int, char **);
 
-const char myfile[] = "/root/Desktop/cm/clipboard";
-const char myfilenew[] = "/root/Desktop/cm/clipboard.new";
+const char myfile[] = "clipboard_path_added_by_setup.sh";
+const char myfilenew[] = "clipboard_path_added_by_setup.sh.new";
 
 FILE *sptr, *dptr;
 
@@ -36,11 +36,11 @@ enum mode
     REMOVE
 };
 
-enum mode CURRENT_RUN = NONE; // False in function_mode indicates that the execution is for adding into clipboard
-static bool Move = false;     // False in copy_move is to sent copy and true for moving
-static bool Error_mode = false;
+enum mode CURRENT_RUN = NONE;   // CURRENT_RUN is the driver object of the program
+static bool Move = false;       // Move is used to decide between moving and copying [Default is copying]
+static bool Error_mode = false; // Error_mode when set to true displays additional details for troubleshooting
 
-int cwd_path(char *cwd)
+int cwd_path(char *cwd)         // USed to get the Current Working Directory
 {
     if (getcwd(cwd, 10000) != NULL)
         return 0;
@@ -51,18 +51,19 @@ int cwd_path(char *cwd)
     }
 }
 
-int absolute_path(char *file_path, char *full_path)
+int absolute_path(int flg, char *file_path, char *full_path)    //Used to get the absolute path of the files
 {
     if (realpath(file_path, full_path) != NULL)
         return 0;
     else
     {
-        printf("%s can not be found.\n", file_path);
+        if (flg != 0)
+            printf("%s can not be found.\n", file_path);
         return -1;
     }
 }
 
-int errors(int err)
+int errors(int err) // This Function is used to display errors and terminate the program accordingly
 {
     if (Error_mode == true)
         printf("Error Code : %d\n", err);
@@ -113,8 +114,8 @@ int errors(int err)
     exit(err);
 }
 
-int find_lines(char *options)
-{
+int find_lines(char *options)   // Used to parse the argument provided as a string to integer variables
+{                               // Example: "2-5" as string to 2 and 5 as integers
     int p = -1, len = line();
     if (options[0] == '-')
         errors(50);
@@ -147,7 +148,7 @@ int find_lines(char *options)
     return 0;
 }
 
-int line()
+int line()  // Used to count the number of lines in the clipboard file
 {
     int count = 0;
     char ch;
@@ -166,7 +167,7 @@ int line()
     return count;
 }
 
-int arg1(char ch)
+int arg1(char ch)   // Used to set global variables according to the options[ starting with a '+' ] provided
 {
     switch (ch)
     {
@@ -219,7 +220,7 @@ int arg1(char ch)
     return 0;
 }
 
-int arg2(const char *choice, char *argv[])
+int arg2(const char *choice, char *argv[])  // Used to set global variables according to the options[ starting with a '++' ] provided
 {
     if (strcmp(&choice[2], "modify") == 0)
     {
@@ -261,7 +262,7 @@ int arg2(const char *choice, char *argv[])
     return 0;
 }
 
-int add(int argc, char *argv[])
+int add(int argc, char *argv[]) // Used to add the files' absolute path to the clipboard
 {
     char full_path[10000], flg = 0;
     if (n == argc)
@@ -273,7 +274,7 @@ int add(int argc, char *argv[])
 
     for (int i = n; i < argc; i++)
     {
-        if ((absolute_path(argv[i], full_path) == 0) && flg == 0)
+        if ((absolute_path(0, argv[i], full_path) == 0) && flg == 0)
         {
             if (Move == true)
                 fprintf(sptr, " mv ");
@@ -282,7 +283,7 @@ int add(int argc, char *argv[])
             flg = 1;
         }
 
-        if (absolute_path(argv[i], full_path) == 0)
+        if (absolute_path(1, argv[i], full_path) == 0)
             fprintf(sptr, "%s ", full_path);
     }
     fprintf(sptr, "%c", '\n');
@@ -290,34 +291,32 @@ int add(int argc, char *argv[])
     return 0;
 }
 
-int paste()
+int paste() // Used to execute the lines stored in the clipboard file
 {
-    char ch, source_path[100000] = {""};
+    char ch, source_path[100000] = {0};
     char *dest_path = (char *)malloc(sizeof(char) * 10000);
     int Current_line = 1;
     cwd_path(dest_path);
-    sptr = fopen(myfile, "r+");
+    sptr = fopen(myfile, "r");
     if (sptr == NULL)
         errors(500);
 
     if (line_start == 0 && line_end == 0)
-    {
         line_end = line();
-        goto file_copy;
-    }
-
-    while (Current_line != line_start)
+    else
     {
-        if (ch == '\n')
-            Current_line++;
-        ch = getc(sptr);
+        while (Current_line != line_start)
+        {
+            if (ch == '\n')
+                Current_line++;
+            ch = getc(sptr);
+        }
     }
 
-file_copy:
     ch = getc(sptr);
     while (ch != EOF)
     {
-        fscanf(sptr, "%[^\n]s", source_path); // Need a dynamic arry and string concate
+        fscanf(sptr, "%[^\n]s", source_path);
         strcat(source_path, dest_path);
         system(source_path);
         if (Current_line == line_end)
@@ -327,7 +326,7 @@ file_copy:
     return 0;
 }
 
-int clear()
+int clear() // Empties the clipboard by deleting the old one and creating a new clipboard file
 {
     remove(myfile);
     sptr = fopen(myfile, "w+");
@@ -335,20 +334,20 @@ int clear()
     return 0;
 }
 
-int list()
+int list()  //Used to list all the contents of the clipboard 
 {
     char string[10000] = {'\0'};
     sptr = fopen(myfile, "r");
     for (int i = 1; fgetc(sptr) != EOF; i++)
     {
         fscanf(sptr, "%[^\n]s", string);
-        printf("%d. %s\n ", i, string);
+        printf("%d. %s\n ", i, string+3);
     }
     fclose(sptr);
     return 0;
 }
 
-int remove_line()
+int remove_line()   // Used to remove specific line in the clipboard file
 {
     char ch;
     int Current_line = 1;
@@ -381,9 +380,9 @@ int remove_line()
     return 0;
 }
 
-int modify(int argc,char *argv[])
+int modify(int argc, char *argv[])  // Used to modify specific lines in the clipboard file
 {
-    char ch,file_to_add[10000], flg = 0,flg1=0;
+    char ch, file_to_add[10000], flg = 0, flg1 = 0;
     int Current_line = 1;
     FILE *sptr, *dptr;
     sptr = fopen(myfile, "r");
@@ -409,19 +408,18 @@ int modify(int argc,char *argv[])
             {
                 for (int i = n; i < argc; i++)
                 {
-                    if ((absolute_path(&argv[i][0], file_to_add) == 0) && flg1 == 0)
+                    if ((absolute_path(0, &argv[i][0], file_to_add) == 0) && flg1 == 0)
                     {
                         if (Move == true)
                             fprintf(dptr, "\n mv ");
                         else
                             fprintf(dptr, "\n cp ");
-                        flg1=1;
+                        flg1 = 1;
                     }
 
-                    if (absolute_path(&argv[i][0], file_to_add) == 0)
+                    if (absolute_path(1, &argv[i][0], file_to_add) == 0)
                         fprintf(dptr, "%s ", file_to_add);
                 }
-            
             }
             flg = 1;
         }
@@ -444,7 +442,7 @@ void help()
     printf("++clear or +c to clear contents copied files\n");
 }
 
-int execute(int argc, char *argv[]) //All the execution of the functions r gonna be made here
+int execute(int argc, char *argv[]) // Used to execute the functions as requested by the options
 {
     if (CURRENT_RUN == ADD)
         add(argc, argv);
@@ -458,11 +456,11 @@ int execute(int argc, char *argv[]) //All the execution of the functions r gonna
             remove_line();
     }
     else if (CURRENT_RUN == MODIFY)
-        modify(argc,argv);
+        modify(argc, argv);
     return 0;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[])    // The Main function with command line arguments
 {
 
     if (argc <= 1)
@@ -473,7 +471,7 @@ int main(int argc, char *argv[])
         return 0;
     }
     char choice[20];
-    for (i = 1; i < argc; i++)
+    for (i = 1; i < argc; i++)  // Loop to parse for the options in the command line arguments
     {
         strcpy(choice, argv[i]);
         if (choice[0] != '+')
