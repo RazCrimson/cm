@@ -16,12 +16,12 @@ int paste();
 int clear();
 int list();
 int remove_line();
-int modify(char *);
+int modify(int ,char **);
 void help();
 int execute(int, char **);
 
-const char myfile[] = "clipboard_path_added_by_setup.sh";
-const char myfilenew[] = "clipboard_path_added_by_setup.sh.new";
+const char myfile[] = "/root/Desktop/cm/clipboard";
+const char myfilenew[] = "/root/Desktop/cm/clipboard.new";
 
 FILE *sptr, *dptr;
 
@@ -68,47 +68,47 @@ int errors(int err)
         printf("Error Code : %d\n", err);
     switch (err)
     {
-        case 1:
-            printf("The additonal arguments are not evaluated.\nPlease use the options ++help or +h\n");
-            break;
-        case -10:
-            printf("Please enter valid combination of options.\n", err);
-            break;
-        case -11:
-            printf("Please enter valid options.\n", err);
-            break;
-        case 50:
-            printf("Please enter the starting index of the range!!\nThe Current List contains: ");
-            list();
-            break;
-        case 51:
-            printf("Please enter a valid range!!\nThe Current List contains: ");
-            list();
-            break;
-        case 52:
-            printf("Please enter a range!!, Your input contains a non-digit value in the range.\n");
-            break;
-        case 53:
-            printf("Please enter a valid range!!, Your input contains more than one '-'.\nPlease use one '-' to specify the range.\n");
-            break;
-        //case 99: reserverd for cwd_path
-        case 100:
-        case 200:
-        case 500:
-        case 1000:
-            printf("The Clipboard file is not found or opened!\n");
-            break;
-        case 101:
-            printf("The start of the range to be removed is Invalid(0)\n");
-            break;
-        case 201:
-            printf("The start of the range to be modified is Invalid(0)\n");
-            break;
-        case 1001:
-            printf("The add option requires additional arguments\n");
-            break;
-        default:
-            printf("Unknown Error!");
+    case 1:
+        printf("The additonal arguments are not evaluated.\nPlease use the options ++help or +h\n");
+        break;
+    case -10:
+        printf("Please enter valid combination of options.\n", err);
+        break;
+    case -11:
+        printf("Please enter valid options.\n", err);
+        break;
+    case 50:
+        printf("Please enter the starting index of the range!!\nThe Current List contains: ");
+        list();
+        break;
+    case 51:
+        printf("Please enter a valid range!!\nThe Current List contains: ");
+        list();
+        break;
+    case 52:
+        printf("Please enter a range!!, Your input contains a non-digit value in the range.\n");
+        break;
+    case 53:
+        printf("Please enter a valid range!!, Your input contains more than one '-'.\nPlease use one '-' to specify the range.\n");
+        break;
+    //case 99: reserverd for cwd_path
+    case 100:
+    case 200:
+    case 500:
+    case 1000:
+        printf("The Clipboard file is not found or opened!\n");
+        break;
+    case 101:
+        printf("The start of the range to be removed is Invalid(0)\n");
+        break;
+    case 201:
+        printf("The start of the range to be modified is Invalid(0)\n");
+        break;
+    case 1001:
+        printf("The add option requires additional arguments\n");
+        break;
+    default:
+        printf("Unknown Error!");
     }
     exit(err);
 }
@@ -143,6 +143,7 @@ int find_lines(char *options)
         if (line_end < line_start || line_end >= len)
             errors(51);
     }
+    n++;
     return 0;
 }
 
@@ -164,7 +165,6 @@ int line()
     fclose(sptr);
     return count;
 }
-
 
 int arg1(char ch)
 {
@@ -212,7 +212,7 @@ int arg1(char ch)
         Move = true;
         break;
     case 'e':
-        Error_mode=true;
+        Error_mode = true;
     default:
         errors(-11);
     }
@@ -263,25 +263,25 @@ int arg2(const char *choice, char *argv[])
 
 int add(int argc, char *argv[])
 {
-    char full_path[10000],flg=0;
+    char full_path[10000], flg = 0;
     if (n == argc)
         errors(1001);
     sptr = fopen(myfile, "a+");
-    
+
     if (sptr == NULL)
         errors(1000);
 
     for (int i = n; i < argc; i++)
     {
-        if((absolute_path(argv[i], full_path) == 0)&&flg==0)
+        if ((absolute_path(argv[i], full_path) == 0) && flg == 0)
         {
             if (Move == true)
                 fprintf(sptr, " mv ");
             else
                 fprintf(sptr, " cp ");
-               flg=1;
+            flg = 1;
         }
-        
+
         if (absolute_path(argv[i], full_path) == 0)
             fprintf(sptr, "%s ", full_path);
     }
@@ -290,10 +290,9 @@ int add(int argc, char *argv[])
     return 0;
 }
 
-
 int paste()
 {
-    char ch,source_path[100000] = {""};
+    char ch, source_path[100000] = {""};
     char *dest_path = (char *)malloc(sizeof(char) * 10000);
     int Current_line = 1;
     cwd_path(dest_path);
@@ -301,29 +300,29 @@ int paste()
     if (sptr == NULL)
         errors(500);
 
-    if(line_start==0&&line_end==0)
-    {    
-        line_end=line();
+    if (line_start == 0 && line_end == 0)
+    {
+        line_end = line();
         goto file_copy;
     }
-     
+
     while (Current_line != line_start)
     {
         if (ch == '\n')
             Current_line++;
         ch = getc(sptr);
     }
-    
-    file_copy:
-    ch=getc(sptr);
+
+file_copy:
+    ch = getc(sptr);
     while (ch != EOF)
     {
         fscanf(sptr, "%[^\n]s", source_path); // Need a dynamic arry and string concate
         strcat(source_path, dest_path);
         system(source_path);
-        if (Current_line==line_end)
+        if (Current_line == line_end)
             break;
-        ch=getc(sptr);
+        ch = getc(sptr);
     }
     return 0;
 }
@@ -363,7 +362,7 @@ int remove_line()
         errors(101);
     if (line_end == 0)
         line_end = line_start;
-    
+
     ch = getc(sptr);
     while (ch != EOF)
     {
@@ -382,9 +381,9 @@ int remove_line()
     return 0;
 }
 
-int modify(char *line_to_add)
+int modify(int argc,char *argv[])
 {
-    char ch, flg = 0;
+    char ch,file_to_add[10000], flg = 0,flg1=0;
     int Current_line = 1;
     FILE *sptr, *dptr;
     sptr = fopen(myfile, "r");
@@ -402,12 +401,28 @@ int modify(char *line_to_add)
         if (ch == '\n')
             Current_line++;
 
-        if (Current_line != line_start)
+        if ((Current_line < line_start) || (Current_line > line_end))
             putc(ch, dptr);
-        else if (Current_line == line_start)
+        else if ((Current_line >= line_start) && (Current_line <= line_end))
         {
             if (flg == 0)
-                fprintf(dptr, "\n%s", line_to_add);
+            {
+                for (int i = n; i < argc; i++)
+                {
+                    if ((absolute_path(&argv[i][0], file_to_add) == 0) && flg1 == 0)
+                    {
+                        if (Move == true)
+                            fprintf(dptr, "\n mv ");
+                        else
+                            fprintf(dptr, "\n cp ");
+                        flg1=1;
+                    }
+
+                    if (absolute_path(&argv[i][0], file_to_add) == 0)
+                        fprintf(dptr, "%s ", file_to_add);
+                }
+            
+            }
             flg = 1;
         }
         ch = getc(sptr);
@@ -443,7 +458,7 @@ int execute(int argc, char *argv[]) //All the execution of the functions r gonna
             remove_line();
     }
     else if (CURRENT_RUN == MODIFY)
-        modify(&argv[n][0]);
+        modify(argc,argv);
     return 0;
 }
 
@@ -452,7 +467,7 @@ int main(int argc, char *argv[])
 
     if (argc <= 1)
     {
-        printf("PLease enter a valid option.\n%s requires atleast one option\
+        printf("Please enter a valid option.\n%s requires atleast one option\
                 \nTry the %s ++help or %s +h for more information\n",
                argv[0], argv[0], argv[0]);
         return 0;
