@@ -294,7 +294,7 @@ int add(int argc, char *argv[]) // Used to add the files' absolute path to the c
 
     for (int i = n; i < argc; i++)
     {
-        if ((absolute_path(0, argv[i], full_path) == 0) && flg == 0)
+        if (((absolute_path(0, argv[i], full_path) == 0)||argv[i][0]=='-') && flg == 0)
         {
             if (Move == true)
                 fprintf(fptr, " mv ");
@@ -302,8 +302,10 @@ int add(int argc, char *argv[]) // Used to add the files' absolute path to the c
                 fprintf(fptr, " cp ");
             flg = 1;
         }
+        if(argv[i][0]=='-')
+            fprintf(fptr, "%s ", &argv[i][0]);
 
-        if (absolute_path(1, argv[i], full_path) == 0)
+        else if (absolute_path(1, argv[i], full_path) == 0)
             fprintf(fptr, "%s ", full_path);
     }
     fprintf(fptr, "%c", '\n');
