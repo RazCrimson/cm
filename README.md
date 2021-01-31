@@ -1,3 +1,1 @@
-To Do:<br/>
-1.ADD more content to the help()<br/>
-2.Check if paste() is working<br/>
+cm is a simple clipboard tool for the for use with the terminal.
